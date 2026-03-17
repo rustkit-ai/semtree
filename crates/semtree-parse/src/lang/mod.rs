@@ -2,7 +2,7 @@ mod go;
 mod javascript;
 mod python;
 mod rust;
-mod shared;
+pub(crate) mod shared;
 mod typescript;
 
 use semtree_core::{Chunk, Language};

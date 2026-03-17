@@ -1,9 +1,8 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use semtree_core::Language;
 use semtree_embed::Embedder;
-use semtree_parse::parse_and_extract_file;
+use semtree_parse::extract_file;
 use semtree_store::VectorStore;
 use tracing::{debug, warn};
 
@@ -24,17 +23,17 @@ impl Indexer {
         path: &Path,
         registry: &mut ChunkRegistry,
     ) -> Result<usize, RagError> {
-        if Language::from_path(path) == Language::Unknown {
-            return Ok(0);
-        }
-
-        let mut chunks = match parse_and_extract_file(path) {
+        let mut chunks = match extract_file(path) {
             Ok(c) => c,
             Err(e) => {
                 warn!("skipping {}: {e}", path.display());
                 return Ok(0);
             }
         };
+
+        if chunks.is_empty() {
+            return Ok(0);
+        }
 
         for chunk in &mut chunks {
             chunk.path = path.to_path_buf();
