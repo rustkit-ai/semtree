@@ -2,26 +2,26 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
+use semtree_core::SemtreeConfig;
 use semtree_rag::{ChunkRegistry, ContextBuilder, SearchEngine};
-use semtree_store::VectorStore;
 
-use super::{make_embedder, make_store};
+use super::make_backends;
 
-pub async fn run(query: &str, top_k: usize, index_dir: &Path) -> Result<()> {
+pub async fn run(query: &str, top_k: usize, index_dir: &Path, config: &SemtreeConfig) -> Result<()> {
     if !index_dir.exists() {
         bail!("No index found at {}. Run `semtree index <path>` first.", index_dir.display());
     }
 
-    let embedder = make_embedder()?;
-    let mut store = make_store()?;
-    std::sync::Arc::get_mut(&mut store)
+    let backends = make_backends(config)?;
+    let mut store = backends.store;
+    Arc::get_mut(&mut store)
         .expect("exclusive")
         .load(index_dir)?;
 
     let mut registry = ChunkRegistry::default();
     registry.load(index_dir)?;
 
-    let engine = Arc::new(SearchEngine::new(embedder, store));
+    let engine = Arc::new(SearchEngine::new(backends.embedder, store));
     let builder = ContextBuilder::new(engine).with_max_chunks(top_k);
     let window = builder.build(query).await?;
 
