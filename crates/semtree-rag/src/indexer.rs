@@ -64,13 +64,55 @@ impl Indexer {
     }
 }
 
+const IGNORED_DIRS: &[&str] = &[
+    // dependencies
+    "node_modules",
+    "vendor",
+    ".pnp",
+    // build output
+    "target",
+    "dist",
+    "build",
+    "out",
+    ".next",
+    ".nuxt",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    // venvs
+    ".venv",
+    "venv",
+    "env",
+    ".env",
+    // version control
+    ".git",
+    ".svn",
+    ".hg",
+    // index itself
+    ".semtree",
+    // misc
+    ".idea",
+    ".vscode",
+    "coverage",
+    ".turbo",
+    ".cache",
+];
+
+fn is_ignored(dir_name: &str) -> bool {
+    IGNORED_DIRS.contains(&dir_name)
+}
+
 fn walkdir(dir: &Path) -> Vec<std::path::PathBuf> {
     let mut paths = Vec::new();
     if let Ok(entries) = std::fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_dir() {
-                paths.extend(walkdir(&path));
+                let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+                if !is_ignored(name) {
+                    paths.extend(walkdir(&path));
+                }
             } else {
                 paths.push(path);
             }
