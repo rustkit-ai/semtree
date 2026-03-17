@@ -1,0 +1,64 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/semtree-core",
+    "crates/semtree-tree",
+    "crates/semtree-extract",
+    "crates/semtree-embed",
+    "crates/semtree-index",
+    "crates/semtree-store",
+    "crates/semtree-search",
+    "crates/semtree-context",
+    "crates/semtree-analyze",
+    "crates/semtree-mcp",
+    "crates/semtree-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["rustkit-ai"]
+repository = "https://github.com/rustkit-ai/semtree"
+
+[workspace.dependencies]
+# async
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+
+# error handling
+anyhow = "1"
+thiserror = "2"
+
+# serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# tree-sitter
+tree-sitter = "0.25"
+tree-sitter-rust = "0.23"
+tree-sitter-python = "0.23"
+tree-sitter-javascript = "0.23"
+tree-sitter-typescript = "0.23"
+tree-sitter-go = "0.23"
+
+# embeddings
+fastembed = "4"
+
+# vector store
+usearch = "2"
+
+# logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# internal crates
+semtree-core    = { path = "crates/semtree-core" }
+semtree-tree    = { path = "crates/semtree-tree" }
+semtree-extract = { path = "crates/semtree-extract" }
+semtree-embed   = { path = "crates/semtree-embed" }
+semtree-store   = { path = "crates/semtree-store" }
+semtree-index   = { path = "crates/semtree-index" }
+semtree-search  = { path = "crates/semtree-search" }
+semtree-context = { path = "crates/semtree-context" }
+semtree-analyze = { path = "crates/semtree-analyze" }

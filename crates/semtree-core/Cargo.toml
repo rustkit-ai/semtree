@@ -1,0 +1,11 @@
+[package]
+name = "semtree-core"
+description = "Core types for semtree: Language, Span, Node, Chunk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }

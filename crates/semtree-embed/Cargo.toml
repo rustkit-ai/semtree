@@ -1,0 +1,22 @@
+[package]
+name = "semtree-embed"
+description = "Embedding trait and backends (fastembed, openai)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+semtree-core = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
+
+[dependencies.fastembed]
+workspace = true
+optional = true
+
+[features]
+default = ["fastembed-backend"]
+fastembed-backend = ["fastembed"]

@@ -1,0 +1,23 @@
+[package]
+name = "semtree-store"
+description = "Vector store trait and backends (usearch)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+semtree-core = { workspace = true }
+semtree-embed = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dependencies.usearch]
+workspace = true
+optional = true
+
+[features]
+default = ["usearch-backend"]
+usearch-backend = ["usearch"]

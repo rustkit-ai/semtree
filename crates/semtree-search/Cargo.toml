@@ -1,0 +1,15 @@
+[package]
+name = "semtree-search"
+description = "Semantic code search over an indexed codebase"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+semtree-core  = { workspace = true }
+semtree-embed = { workspace = true }
+semtree-store = { workspace = true }
+tokio         = { workspace = true }
+thiserror     = { workspace = true }
+serde         = { workspace = true }

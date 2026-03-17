@@ -1,0 +1,16 @@
+[package]
+name = "semtree-context"
+description = "RAG context injection for LLMs: retrieve relevant code chunks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+semtree-core   = { workspace = true }
+semtree-embed  = { workspace = true }
+semtree-store  = { workspace = true }
+semtree-search = { workspace = true }
+tokio          = { workspace = true }
+thiserror      = { workspace = true }
+serde          = { workspace = true }

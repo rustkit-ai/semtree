@@ -1,0 +1,25 @@
+[package]
+name = "semtree-cli"
+description = "CLI for semtree: index, search, analyze codebases"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "semtree"
+path = "src/main.rs"
+
+[dependencies]
+semtree-core    = { workspace = true }
+semtree-index   = { workspace = true }
+semtree-search  = { workspace = true }
+semtree-context = { workspace = true }
+semtree-embed   = { workspace = true }
+semtree-store   = { workspace = true }
+tokio           = { workspace = true }
+tracing         = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde           = { workspace = true }
+serde_json      = { workspace = true }
+anyhow          = { workspace = true }
