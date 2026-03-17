@@ -1,5 +1,6 @@
 pub mod context;
 pub mod index;
+pub mod init;
 pub mod search;
 
 use std::sync::Arc;
