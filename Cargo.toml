@@ -7,7 +7,6 @@ members = [
     "crates/semtree-store",
     "crates/semtree-rag",
     "crates/semtree-analyze",
-    "crates/semtree-mcp",
     "crates/semtree-cli",
 ]
 
