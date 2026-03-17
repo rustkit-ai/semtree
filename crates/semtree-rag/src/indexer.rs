@@ -3,21 +3,11 @@ use std::sync::Arc;
 
 use semtree_core::Language;
 use semtree_embed::Embedder;
-use semtree_extract::extract;
+use semtree_parse::parse_and_extract_file;
 use semtree_store::VectorStore;
-use semtree_tree::SemtreeParser;
-use thiserror::Error;
 use tracing::{debug, warn};
 
-#[derive(Debug, Error)]
-pub enum IndexError {
-    #[error("embed error: {0}")]
-    Embed(#[from] semtree_embed::EmbedError),
-    #[error("store error: {0}")]
-    Store(#[from] semtree_store::StoreError),
-    #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
-}
+use crate::RagError;
 
 pub struct Indexer {
     embedder: Arc<dyn Embedder>,
@@ -29,29 +19,19 @@ impl Indexer {
         Self { embedder, store }
     }
 
-    pub async fn index_file(&self, path: &Path) -> Result<usize, IndexError> {
-        let lang = Language::from_path(path);
-        if lang == Language::Unknown {
+    pub async fn index_file(&self, path: &Path) -> Result<usize, RagError> {
+        if Language::from_path(path) == Language::Unknown {
             return Ok(0);
         }
 
-        let parsed = match SemtreeParser::parse_file(path) {
-            Ok(t) => t,
-            Err(e) => {
-                warn!("parse failed for {}: {e}", path.display());
-                return Ok(0);
-            }
-        };
-
-        let mut chunks = match extract(&parsed) {
+        let mut chunks = match parse_and_extract_file(path) {
             Ok(c) => c,
             Err(e) => {
-                warn!("extract failed for {}: {e}", path.display());
+                warn!("skipping {}: {e}", path.display());
                 return Ok(0);
             }
         };
 
-        // attach file path to chunks
         for chunk in &mut chunks {
             chunk.path = path.to_path_buf();
         }
@@ -61,16 +41,16 @@ impl Indexer {
 
         for (chunk, embedding) in chunks.iter().zip(embeddings.iter()) {
             self.store.insert(&chunk.id, embedding).await?;
-            debug!("indexed chunk {} ({})", chunk.id, chunk.name.as_deref().unwrap_or("?"));
+            debug!("indexed {}", chunk.name.as_deref().unwrap_or(&chunk.id));
         }
 
         Ok(chunks.len())
     }
 
-    pub async fn index_dir(&self, dir: &Path) -> Result<usize, IndexError> {
+    pub async fn index_dir(&self, dir: &Path) -> Result<usize, RagError> {
         let mut total = 0;
-        for entry in walkdir(dir) {
-            total += self.index_file(&entry).await?;
+        for path in walkdir(dir) {
+            total += self.index_file(&path).await?;
         }
         Ok(total)
     }

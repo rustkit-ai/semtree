@@ -2337,8 +2337,7 @@ name = "semtree-analyze"
 version = "0.1.0"
 dependencies = [
  "semtree-core",
- "semtree-extract",
- "semtree-tree",
+ "semtree-parse",
  "serde",
  "thiserror",
 ]
@@ -2348,30 +2347,16 @@ name = "semtree-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "semtree-context",
  "semtree-core",
  "semtree-embed",
- "semtree-index",
- "semtree-search",
+ "semtree-parse",
+ "semtree-rag",
  "semtree-store",
  "serde",
  "serde_json",
  "tokio",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "semtree-context"
-version = "0.1.0"
-dependencies = [
- "semtree-core",
- "semtree-embed",
- "semtree-search",
- "semtree-store",
- "serde",
- "thiserror",
- "tokio",
 ]
 
 [[package]]
@@ -2395,41 +2380,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "semtree-extract"
-version = "0.1.0"
-dependencies = [
- "semtree-core",
- "semtree-tree",
- "serde",
- "thiserror",
- "tree-sitter",
-]
-
-[[package]]
-name = "semtree-index"
-version = "0.1.0"
-dependencies = [
- "semtree-core",
- "semtree-embed",
- "semtree-extract",
- "semtree-store",
- "semtree-tree",
- "serde",
- "thiserror",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "semtree-mcp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "semtree-context",
  "semtree-core",
  "semtree-embed",
- "semtree-index",
- "semtree-search",
+ "semtree-parse",
+ "semtree-rag",
  "semtree-store",
  "serde",
  "serde_json",
@@ -2439,15 +2397,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "semtree-search"
+name = "semtree-parse"
 version = "0.1.0"
 dependencies = [
  "semtree-core",
+ "serde",
+ "thiserror",
+ "tree-sitter",
+ "tree-sitter-go",
+ "tree-sitter-javascript",
+ "tree-sitter-python",
+ "tree-sitter-rust",
+ "tree-sitter-typescript",
+]
+
+[[package]]
+name = "semtree-rag"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "semtree-core",
  "semtree-embed",
+ "semtree-parse",
  "semtree-store",
  "serde",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -2461,20 +2437,6 @@ dependencies = [
  "serde_json",
  "thiserror",
  "usearch",
-]
-
-[[package]]
-name = "semtree-tree"
-version = "0.1.0"
-dependencies = [
- "semtree-core",
- "thiserror",
- "tree-sitter",
- "tree-sitter-go",
- "tree-sitter-javascript",
- "tree-sitter-python",
- "tree-sitter-rust",
- "tree-sitter-typescript",
 ]
 
 [[package]]

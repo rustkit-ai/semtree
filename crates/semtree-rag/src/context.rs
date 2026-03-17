@@ -1,19 +1,20 @@
 use std::sync::Arc;
 
-use semtree_search::{SearchEngine, SearchError};
 use serde::{Deserialize, Serialize};
+
+use crate::{RagError, SearchEngine};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ContextSnippet {
+    pub chunk_id: String,
+    pub score: f32,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContextWindow {
     pub query: String,
     pub snippets: Vec<ContextSnippet>,
     pub prompt: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ContextSnippet {
-    pub chunk_id: String,
-    pub score: f32,
 }
 
 pub struct ContextBuilder {
@@ -31,18 +32,14 @@ impl ContextBuilder {
         self
     }
 
-    pub async fn build(&self, query: &str) -> Result<ContextWindow, SearchError> {
+    pub async fn build(&self, query: &str) -> Result<ContextWindow, RagError> {
         let hits = self.engine.search(query, self.max_chunks).await?;
 
         let snippets: Vec<ContextSnippet> = hits
             .iter()
-            .map(|h| ContextSnippet {
-                chunk_id: h.id.clone(),
-                score: h.score,
-            })
+            .map(|h| ContextSnippet { chunk_id: h.id.clone(), score: h.score })
             .collect();
 
-        // Simple prompt template — consumers can override
         let context_block = snippets
             .iter()
             .enumerate()

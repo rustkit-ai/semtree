@@ -11,12 +11,11 @@ name = "semtree-mcp"
 path = "src/main.rs"
 
 [dependencies]
-semtree-core    = { workspace = true }
-semtree-index   = { workspace = true }
-semtree-search  = { workspace = true }
-semtree-context = { workspace = true }
-semtree-embed   = { workspace = true }
-semtree-store   = { workspace = true }
+semtree-core  = { workspace = true }
+semtree-parse = { workspace = true }
+semtree-embed = { workspace = true }
+semtree-store = { workspace = true }
+semtree-rag   = { workspace = true }
 tokio           = { workspace = true }
 tracing         = { workspace = true }
 tracing-subscriber = { workspace = true }

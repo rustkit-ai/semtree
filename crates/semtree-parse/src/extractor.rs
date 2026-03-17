@@ -1,5 +1,5 @@
 use semtree_core::Chunk;
-use semtree_tree::ParsedTree;
+use crate::parser::ParsedTree;
 
 pub trait Extractor {
     fn extract(&self, tree: &ParsedTree) -> Vec<Chunk>;

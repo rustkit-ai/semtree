@@ -7,8 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-semtree-core    = { workspace = true }
-semtree-tree    = { workspace = true }
-semtree-extract = { workspace = true }
+semtree-core  = { workspace = true }
+semtree-parse = { workspace = true }
 thiserror       = { workspace = true }
 serde           = { workspace = true }

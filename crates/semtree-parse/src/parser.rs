@@ -1,7 +1,7 @@
 use semtree_core::Language;
 use tree_sitter::{Node, Parser, Tree};
 
-use crate::TreeError;
+use crate::ParseError;
 
 pub struct ParsedTree {
     pub language: Language,
@@ -26,14 +26,12 @@ impl ParsedTree {
 pub struct SemtreeParser;
 
 impl SemtreeParser {
-    pub fn parse(source: &str, language: Language) -> Result<ParsedTree, TreeError> {
+    pub fn parse(source: &str, language: Language) -> Result<ParsedTree, ParseError> {
         let ts_language = ts_language(language)?;
         let mut parser = Parser::new();
         parser.set_language(&ts_language).expect("valid language");
 
-        let tree = parser
-            .parse(source, None)
-            .ok_or(TreeError::ParseFailed)?;
+        let tree = parser.parse(source, None).ok_or(ParseError::ParseFailed)?;
 
         Ok(ParsedTree {
             language,
@@ -42,30 +40,23 @@ impl SemtreeParser {
         })
     }
 
-    pub fn parse_file(path: &std::path::Path) -> Result<ParsedTree, TreeError> {
+    pub fn parse_file(path: &std::path::Path) -> Result<ParsedTree, ParseError> {
         let language = Language::from_path(path);
         if language == Language::Unknown {
-            return Err(TreeError::UnsupportedLanguage(
-                path.extension()
-                    .and_then(|e| e.to_str())
-                    .unwrap_or("?")
-                    .to_string(),
-            ));
+            return Err(ParseError::UnsupportedLanguage(language));
         }
-        let source = std::fs::read_to_string(path).map_err(|e| {
-            TreeError::UnsupportedLanguage(e.to_string())
-        })?;
+        let source = std::fs::read_to_string(path)?;
         Self::parse(&source, language)
     }
 }
 
-fn ts_language(lang: Language) -> Result<tree_sitter::Language, TreeError> {
+fn ts_language(lang: Language) -> Result<tree_sitter::Language, ParseError> {
     match lang {
         Language::Rust => Ok(tree_sitter_rust::LANGUAGE.into()),
         Language::Python => Ok(tree_sitter_python::LANGUAGE.into()),
         Language::JavaScript => Ok(tree_sitter_javascript::LANGUAGE.into()),
         Language::TypeScript => Ok(tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into()),
         Language::Go => Ok(tree_sitter_go::LANGUAGE.into()),
-        Language::Unknown => Err(TreeError::UnsupportedLanguage("unknown".into())),
+        Language::Unknown => Err(ParseError::UnsupportedLanguage(lang)),
     }
 }

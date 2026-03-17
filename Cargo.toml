@@ -2,13 +2,10 @@
 resolver = "2"
 members = [
     "crates/semtree-core",
-    "crates/semtree-tree",
-    "crates/semtree-extract",
+    "crates/semtree-parse",
     "crates/semtree-embed",
-    "crates/semtree-index",
     "crates/semtree-store",
-    "crates/semtree-search",
-    "crates/semtree-context",
+    "crates/semtree-rag",
     "crates/semtree-analyze",
     "crates/semtree-mcp",
     "crates/semtree-cli",
@@ -54,11 +51,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # internal crates
 semtree-core    = { path = "crates/semtree-core" }
-semtree-tree    = { path = "crates/semtree-tree" }
-semtree-extract = { path = "crates/semtree-extract" }
+semtree-parse   = { path = "crates/semtree-parse" }
 semtree-embed   = { path = "crates/semtree-embed" }
 semtree-store   = { path = "crates/semtree-store" }
-semtree-index   = { path = "crates/semtree-index" }
-semtree-search  = { path = "crates/semtree-search" }
-semtree-context = { path = "crates/semtree-context" }
+semtree-rag     = { path = "crates/semtree-rag" }
 semtree-analyze = { path = "crates/semtree-analyze" }

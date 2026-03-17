@@ -1,8 +1,7 @@
 use semtree_core::{Chunk, ChunkKind, Language, Span};
-use semtree_tree::ParsedTree;
-use tree_sitter::Node;
-
+use crate::parser::ParsedTree;
 use crate::extractor::Extractor;
+use tree_sitter::Node;
 
 pub struct RustExtractor;
 

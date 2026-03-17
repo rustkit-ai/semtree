@@ -1,6 +1,6 @@
 [package]
-name = "semtree-search"
-description = "Semantic code search over an indexed codebase"
+name = "semtree-rag"
+description = "RAG pipeline: index, search, and context injection for LLMs"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,8 +8,11 @@ repository.workspace = true
 
 [dependencies]
 semtree-core  = { workspace = true }
+semtree-parse = { workspace = true }
 semtree-embed = { workspace = true }
 semtree-store = { workspace = true }
+async-trait   = { workspace = true }
 tokio         = { workspace = true }
+tracing       = { workspace = true }
 thiserror     = { workspace = true }
 serde         = { workspace = true }
