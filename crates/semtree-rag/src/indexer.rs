@@ -7,7 +7,7 @@ use semtree_parse::parse_and_extract_file;
 use semtree_store::VectorStore;
 use tracing::{debug, warn};
 
-use crate::RagError;
+use crate::{ChunkRegistry, RagError};
 
 pub struct Indexer {
     embedder: Arc<dyn Embedder>,
@@ -19,7 +19,11 @@ impl Indexer {
         Self { embedder, store }
     }
 
-    pub async fn index_file(&self, path: &Path) -> Result<usize, RagError> {
+    pub async fn index_file(
+        &self,
+        path: &Path,
+        registry: &mut ChunkRegistry,
+    ) -> Result<usize, RagError> {
         if Language::from_path(path) == Language::Unknown {
             return Ok(0);
         }
@@ -41,16 +45,21 @@ impl Indexer {
 
         for (chunk, embedding) in chunks.iter().zip(embeddings.iter()) {
             self.store.insert(&chunk.id, embedding).await?;
+            registry.insert(chunk.clone());
             debug!("indexed {}", chunk.name.as_deref().unwrap_or(&chunk.id));
         }
 
         Ok(chunks.len())
     }
 
-    pub async fn index_dir(&self, dir: &Path) -> Result<usize, RagError> {
+    pub async fn index_dir(
+        &self,
+        dir: &Path,
+        registry: &mut ChunkRegistry,
+    ) -> Result<usize, RagError> {
         let mut total = 0;
         for path in walkdir(dir) {
-            total += self.index_file(&path).await?;
+            total += self.index_file(&path, registry).await?;
         }
         Ok(total)
     }

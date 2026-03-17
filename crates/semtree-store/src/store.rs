@@ -14,4 +14,8 @@ pub trait VectorStore: Send + Sync {
     async fn insert(&self, id: &str, embedding: &Embedding) -> Result<(), StoreError>;
     async fn search(&self, query: &Embedding, top_k: usize) -> Result<Vec<Hit>, StoreError>;
     async fn delete(&self, id: &str) -> Result<(), StoreError>;
+    fn save(&self, path: &std::path::Path) -> Result<(), StoreError>;
+    fn load(&mut self, path: &std::path::Path) -> Result<(), StoreError>;
+    fn len(&self) -> usize;
+    fn is_empty(&self) -> bool { self.len() == 0 }
 }

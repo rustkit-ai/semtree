@@ -12,13 +12,13 @@ path = "src/main.rs"
 
 [dependencies]
 semtree-core  = { workspace = true }
-semtree-parse = { workspace = true }
 semtree-embed = { workspace = true }
 semtree-store = { workspace = true }
 semtree-rag   = { workspace = true }
-tokio           = { workspace = true }
-tracing         = { workspace = true }
+tokio              = { workspace = true }
+tracing            = { workspace = true }
 tracing-subscriber = { workspace = true }
-serde           = { workspace = true }
-serde_json      = { workspace = true }
-anyhow          = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+anyhow             = { workspace = true }
+clap               = { version = "4", features = ["derive"] }
