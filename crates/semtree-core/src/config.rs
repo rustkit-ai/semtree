@@ -1,27 +1,21 @@
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum EmbedBackend {
+    #[default]
     Fastembed,
     OpenAI,
     Ollama,
 }
 
-impl Default for EmbedBackend {
-    fn default() -> Self { Self::Fastembed }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum StoreBackend {
+    #[default]
     Usearch,
     Qdrant,
-}
-
-impl Default for StoreBackend {
-    fn default() -> Self { Self::Usearch }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

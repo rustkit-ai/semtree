@@ -63,20 +63,36 @@ pub fn subtract(a: i32, b: i32) -> i32 {
     let indexer = Indexer::new(embedder.clone(), store.clone());
     let mut registry = ChunkRegistry::default();
 
-    let n_a = indexer.index_file(&file_a, &mut registry).await.expect("index file_a");
-    let n_b = indexer.index_file(&file_b, &mut registry).await.expect("index file_b");
-    let n_c = indexer.index_file(&file_c, &mut registry).await.expect("index file_c");
+    let n_a = indexer
+        .index_file(&file_a, &mut registry)
+        .await
+        .expect("index file_a");
+    let n_b = indexer
+        .index_file(&file_b, &mut registry)
+        .await
+        .expect("index file_b");
+    let n_c = indexer
+        .index_file(&file_c, &mut registry)
+        .await
+        .expect("index file_c");
 
     let total = n_a + n_b + n_c;
     assert!(total > 0, "should have indexed at least one chunk");
 
     // ── registry ──────────────────────────────────────────────────────────────
-    assert_eq!(registry.len(), total, "registry should hold all indexed chunks");
+    assert_eq!(
+        registry.len(),
+        total,
+        "registry should hold all indexed chunks"
+    );
     assert!(!registry.is_empty(), "registry should not be empty");
 
     // ── search ────────────────────────────────────────────────────────────────
     let engine = SearchEngine::new(embedder, store);
-    let hits = engine.search("arithmetic operations", 3).await.expect("search");
+    let hits = engine
+        .search("arithmetic operations", 3)
+        .await
+        .expect("search");
 
     assert!(!hits.is_empty(), "should return at least one hit");
 

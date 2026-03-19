@@ -3,8 +3,8 @@ pub mod index;
 pub mod init;
 pub mod search;
 
-use std::sync::Arc;
 use anyhow::{bail, Result};
+use std::sync::Arc;
 
 use semtree_core::{EmbedBackend, SemtreeConfig, StoreBackend};
 use semtree_embed::fastembed::FastEmbedder;

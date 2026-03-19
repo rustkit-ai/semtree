@@ -43,12 +43,12 @@ pub fn standalone() -> i32 {
     );
 
     // Check names
-    let names: Vec<&str> = chunks
-        .iter()
-        .filter_map(|c| c.name.as_deref())
-        .collect();
+    let names: Vec<&str> = chunks.iter().filter_map(|c| c.name.as_deref()).collect();
     assert!(names.contains(&"Foo"), "should have struct named Foo");
-    assert!(names.contains(&"standalone"), "should have fn named standalone");
+    assert!(
+        names.contains(&"standalone"),
+        "should have fn named standalone"
+    );
 }
 
 // ── Python ────────────────────────────────────────────────────────────────────
@@ -114,7 +114,10 @@ function hello(name: string): string {
 
     let names: Vec<&str> = chunks.iter().filter_map(|c| c.name.as_deref()).collect();
     assert!(names.contains(&"hello"), "should have fn named hello");
-    assert!(names.contains(&"Greeter"), "should have interface named Greeter");
+    assert!(
+        names.contains(&"Greeter"),
+        "should have interface named Greeter"
+    );
 }
 
 // ── JavaScript ────────────────────────────────────────────────────────────────
@@ -204,10 +207,21 @@ fn test_chunk_text_markdown() {
 
     assert!(!chunks.is_empty(), "should produce at least one chunk");
     // With 100 lines, chunk_lines=40, step=35: starts at 0, 35, 70 → 3 chunks
-    assert_eq!(chunks.len(), 3, "expected 3 chunks for 100 lines with chunk_lines=40 overlap=5");
+    assert_eq!(
+        chunks.len(),
+        3,
+        "expected 3 chunks for 100 lines with chunk_lines=40 overlap=5"
+    );
 
     for chunk in &chunks {
-        assert_eq!(chunk.kind, ChunkKind::File, "text chunks should have kind File");
-        assert!(!chunk.content.is_empty(), "chunk content should not be empty");
+        assert_eq!(
+            chunk.kind,
+            ChunkKind::File,
+            "text chunks should have kind File"
+        );
+        assert!(
+            !chunk.content.is_empty(),
+            "chunk content should not be empty"
+        );
     }
 }

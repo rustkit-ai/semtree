@@ -1,12 +1,12 @@
 mod error;
-mod parser;
 mod extractor;
 mod lang;
+mod parser;
 mod text;
 
 pub use error::ParseError;
-pub use parser::{ParsedTree, SemtreeParser};
 pub use extractor::Extractor;
+pub use parser::{ParsedTree, SemtreeParser};
 pub use text::{chunk_text, is_text_file};
 
 use semtree_core::{Chunk, Language};

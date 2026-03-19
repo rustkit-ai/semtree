@@ -1,5 +1,5 @@
-use thiserror::Error;
 use semtree_core::Language;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ParseError {

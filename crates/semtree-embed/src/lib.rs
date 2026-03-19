@@ -1,5 +1,5 @@
-mod error;
 mod embedder;
+mod error;
 
 #[cfg(feature = "fastembed-backend")]
 pub mod fastembed;

@@ -31,7 +31,7 @@ pub fn analyze_chunks(chunks: &[Chunk]) -> Vec<ComplexityReport> {
 
 /// Return references to chunks whose `kind` is `Function` and whose content
 /// has more than `threshold` lines.
-pub fn find_large_functions<'a>(chunks: &'a [Chunk], threshold: usize) -> Vec<&'a Chunk> {
+pub fn find_large_functions(chunks: &[Chunk], threshold: usize) -> Vec<&Chunk> {
     chunks
         .iter()
         .filter(|c| c.kind == ChunkKind::Function && c.content.lines().count() > threshold)
@@ -52,7 +52,12 @@ mod tests {
             kind,
             name: Some(name.to_string()),
             content: content.to_string(),
-            span: Span::new(0, content.len(), 0, content.lines().count().saturating_sub(1)),
+            span: Span::new(
+                0,
+                content.len(),
+                0,
+                content.lines().count().saturating_sub(1),
+            ),
             doc: None,
         }
     }
@@ -66,7 +71,11 @@ mod tests {
                 ChunkKind::Function,
                 "fn b() {\n  let x = 1;\n  let y = 2;\n  x + y\n}\n",
             ),
-            make_chunk("medium_struct", ChunkKind::Struct, "struct S {\n  x: i32,\n}\n"),
+            make_chunk(
+                "medium_struct",
+                ChunkKind::Struct,
+                "struct S {\n  x: i32,\n}\n",
+            ),
         ];
 
         let reports = analyze_chunks(&chunks);
@@ -87,12 +96,18 @@ mod tests {
         let large = make_chunk(
             "big",
             ChunkKind::Function,
-            (0..20).map(|i| format!("  let x{i} = {i};\n")).collect::<String>().as_str(),
+            (0..20)
+                .map(|i| format!("  let x{i} = {i};\n"))
+                .collect::<String>()
+                .as_str(),
         );
         let a_struct = make_chunk(
             "MyStruct",
             ChunkKind::Struct,
-            (0..20).map(|i| format!("  field{i}: i32,\n")).collect::<String>().as_str(),
+            (0..20)
+                .map(|i| format!("  field{i}: i32,\n"))
+                .collect::<String>()
+                .as_str(),
         );
 
         let chunks = vec![small, large, a_struct];

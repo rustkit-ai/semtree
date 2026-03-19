@@ -24,7 +24,10 @@ pub struct ContextBuilder {
 
 impl ContextBuilder {
     pub fn new(engine: Arc<SearchEngine>) -> Self {
-        Self { engine, max_chunks: 5 }
+        Self {
+            engine,
+            max_chunks: 5,
+        }
     }
 
     pub fn with_max_chunks(mut self, n: usize) -> Self {
@@ -37,7 +40,10 @@ impl ContextBuilder {
 
         let snippets: Vec<ContextSnippet> = hits
             .iter()
-            .map(|h| ContextSnippet { chunk_id: h.id.clone(), score: h.score })
+            .map(|h| ContextSnippet {
+                chunk_id: h.id.clone(),
+                score: h.score,
+            })
             .collect();
 
         let context_block = snippets
@@ -51,6 +57,10 @@ impl ContextBuilder {
             "Use the following code context to answer the question.\n\n{context_block}\n\nQuestion: {query}"
         );
 
-        Ok(ContextWindow { query: query.to_string(), snippets, prompt })
+        Ok(ContextWindow {
+            query: query.to_string(),
+            snippets,
+            prompt,
+        })
     }
 }

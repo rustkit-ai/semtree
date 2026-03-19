@@ -1,9 +1,9 @@
 use semtree_core::{Chunk, ChunkKind, Language};
 use tree_sitter::Node;
 
+use super::shared::{make_chunk, walk};
 use crate::extractor::Extractor;
 use crate::parser::ParsedTree;
-use super::shared::{make_chunk, walk};
 
 pub struct PythonExtractor;
 
@@ -18,12 +18,28 @@ impl Extractor for PythonExtractor {
 fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
     match node.kind() {
         "function_definition" => {
-            let name = node.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
-            Some(make_chunk(node, tree, Language::Python, ChunkKind::Function, name))
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some(make_chunk(
+                node,
+                tree,
+                Language::Python,
+                ChunkKind::Function,
+                name,
+            ))
         }
         "class_definition" => {
-            let name = node.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
-            Some(make_chunk(node, tree, Language::Python, ChunkKind::Class, name))
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some(make_chunk(
+                node,
+                tree,
+                Language::Python,
+                ChunkKind::Class,
+                name,
+            ))
         }
         "decorated_definition" => {
             // unwrap to inner function or class
@@ -33,7 +49,9 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
                 "class_definition" => ChunkKind::Class,
                 _ => return None,
             };
-            let name = inner.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
+            let name = inner
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
             Some(make_chunk(node, tree, Language::Python, kind, name))
         }
         _ => None,

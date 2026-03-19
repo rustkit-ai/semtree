@@ -72,11 +72,19 @@ async fn main() -> Result<()> {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
             cmd::index::run(&path, &index_dir, &config).await
         }
-        Command::Search { query, top_k, index_dir } => {
+        Command::Search {
+            query,
+            top_k,
+            index_dir,
+        } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
             cmd::search::run(&query, top_k, &index_dir, &config).await
         }
-        Command::Context { query, top_k, index_dir } => {
+        Command::Context {
+            query,
+            top_k,
+            index_dir,
+        } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
             cmd::context::run(&query, top_k, &index_dir, &config).await
         }

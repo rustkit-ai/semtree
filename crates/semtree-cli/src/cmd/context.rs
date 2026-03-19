@@ -7,9 +7,17 @@ use semtree_rag::{ChunkRegistry, ContextBuilder, SearchEngine};
 
 use super::make_backends;
 
-pub async fn run(query: &str, top_k: usize, index_dir: &Path, config: &SemtreeConfig) -> Result<()> {
+pub async fn run(
+    query: &str,
+    top_k: usize,
+    index_dir: &Path,
+    config: &SemtreeConfig,
+) -> Result<()> {
     if !index_dir.exists() {
-        bail!("No index found at {}. Run `semtree index <path>` first.", index_dir.display());
+        bail!(
+            "No index found at {}. Run `semtree index <path>` first.",
+            index_dir.display()
+        );
     }
 
     let backends = make_backends(config)?;
@@ -29,10 +37,19 @@ pub async fn run(query: &str, top_k: usize, index_dir: &Path, config: &SemtreeCo
     for (i, snippet) in window.snippets.iter().enumerate() {
         let chunk = registry.get(&snippet.chunk_id);
         let name = chunk.and_then(|c| c.name.as_deref()).unwrap_or("?");
-        let path = chunk.map(|c| c.path.display().to_string()).unwrap_or_default();
+        let path = chunk
+            .map(|c| c.path.display().to_string())
+            .unwrap_or_default();
         let line = chunk.map(|c| c.span.start_line + 1).unwrap_or(0);
 
-        println!("[{}] {} — {}:{} (score: {:.3})", i + 1, name, path, line, snippet.score);
+        println!(
+            "[{}] {} — {}:{} (score: {:.3})",
+            i + 1,
+            name,
+            path,
+            line,
+            snippet.score
+        );
 
         if let Some(c) = chunk {
             println!("```\n{}\n```\n", c.content);

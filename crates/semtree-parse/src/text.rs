@@ -8,7 +8,17 @@ use crate::lang::shared::chunk_hash;
 pub fn is_text_file(path: &Path) -> bool {
     matches!(
         path.extension().and_then(|e| e.to_str()).unwrap_or(""),
-        "md" | "txt" | "rst" | "json" | "yaml" | "yml" | "toml" | "env" | "csv" | "html" | "xml" | "graphql"
+        "md" | "txt"
+            | "rst"
+            | "json"
+            | "yaml"
+            | "yml"
+            | "toml"
+            | "env"
+            | "csv"
+            | "html"
+            | "xml"
+            | "graphql"
     )
 }
 

@@ -17,5 +17,7 @@ pub trait VectorStore: Send + Sync {
     fn save(&self, path: &std::path::Path) -> Result<(), StoreError>;
     fn load(&mut self, path: &std::path::Path) -> Result<(), StoreError>;
     fn len(&self) -> usize;
-    fn is_empty(&self) -> bool { self.len() == 0 }
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }

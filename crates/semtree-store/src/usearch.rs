@@ -35,7 +35,9 @@ impl UsearchStore {
             ..Default::default()
         };
         let index = Index::new(&options).map_err(|e| StoreError::Init(e.to_string()))?;
-        index.reserve(1024).map_err(|e| StoreError::Init(e.to_string()))?;
+        index
+            .reserve(1024)
+            .map_err(|e| StoreError::Init(e.to_string()))?;
         Ok(index)
     }
 }
@@ -84,7 +86,9 @@ impl VectorStore for UsearchStore {
         let map = self.id_map.read().unwrap();
         if let Some((&key, _)) = map.iter().find(|(_, v)| v.as_str() == id) {
             drop(map);
-            self.index.remove(key).map_err(|e| StoreError::Insert(e.to_string()))?;
+            self.index
+                .remove(key)
+                .map_err(|e| StoreError::Insert(e.to_string()))?;
             self.id_map.write().unwrap().remove(&key);
         }
         Ok(())
@@ -114,10 +118,10 @@ impl VectorStore for UsearchStore {
 
     fn load(&mut self, path: &Path) -> Result<(), StoreError> {
         let meta_path = path.join("meta.json");
-        let raw = std::fs::read_to_string(meta_path)
-            .map_err(|e| StoreError::Init(e.to_string()))?;
-        let meta: serde_json::Value = serde_json::from_str(&raw)
-            .map_err(|e| StoreError::Init(e.to_string()))?;
+        let raw =
+            std::fs::read_to_string(meta_path).map_err(|e| StoreError::Init(e.to_string()))?;
+        let meta: serde_json::Value =
+            serde_json::from_str(&raw).map_err(|e| StoreError::Init(e.to_string()))?;
 
         let next_key: u64 = meta["next_key"].as_u64().unwrap_or(0);
         let id_map: HashMap<u64, String> = meta["id_map"]

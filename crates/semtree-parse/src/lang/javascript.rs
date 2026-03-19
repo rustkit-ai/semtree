@@ -1,9 +1,9 @@
 use semtree_core::{Chunk, ChunkKind, Language};
 use tree_sitter::Node;
 
+use super::shared::{make_chunk, walk};
 use crate::extractor::Extractor;
 use crate::parser::ParsedTree;
-use super::shared::{make_chunk, walk};
 
 pub struct JavaScriptExtractor;
 
@@ -18,16 +18,40 @@ impl Extractor for JavaScriptExtractor {
 fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
     match node.kind() {
         "function_declaration" => {
-            let name = node.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
-            Some(make_chunk(node, tree, Language::JavaScript, ChunkKind::Function, name))
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some(make_chunk(
+                node,
+                tree,
+                Language::JavaScript,
+                ChunkKind::Function,
+                name,
+            ))
         }
         "method_definition" => {
-            let name = node.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
-            Some(make_chunk(node, tree, Language::JavaScript, ChunkKind::Method, name))
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some(make_chunk(
+                node,
+                tree,
+                Language::JavaScript,
+                ChunkKind::Method,
+                name,
+            ))
         }
         "class_declaration" => {
-            let name = node.child_by_field_name("name").map(|n| tree.node_text(&n).to_string());
-            Some(make_chunk(node, tree, Language::JavaScript, ChunkKind::Class, name))
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some(make_chunk(
+                node,
+                tree,
+                Language::JavaScript,
+                ChunkKind::Class,
+                name,
+            ))
         }
         // `const foo = function() {}` or `const foo = () => {}`
         "lexical_declaration" | "variable_declaration" => {
@@ -37,7 +61,13 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
                 let name = declarator
                     .child_by_field_name("name")
                     .map(|n| tree.node_text(&n).to_string());
-                Some(make_chunk(node, tree, Language::JavaScript, ChunkKind::Function, name))
+                Some(make_chunk(
+                    node,
+                    tree,
+                    Language::JavaScript,
+                    ChunkKind::Function,
+                    name,
+                ))
             } else {
                 None
             }

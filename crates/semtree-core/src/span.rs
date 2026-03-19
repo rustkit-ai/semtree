@@ -10,7 +10,12 @@ pub struct Span {
 
 impl Span {
     pub fn new(start_byte: usize, end_byte: usize, start_line: usize, end_line: usize) -> Self {
-        Self { start_byte, end_byte, start_line, end_line }
+        Self {
+            start_byte,
+            end_byte,
+            start_line,
+            end_line,
+        }
     }
 
     pub fn byte_len(&self) -> usize {
