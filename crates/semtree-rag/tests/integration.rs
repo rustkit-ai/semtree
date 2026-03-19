@@ -15,6 +15,7 @@ fn write_tmp_rs(name: &str, content: &str) -> std::path::PathBuf {
 }
 
 #[tokio::test]
+#[ignore = "requires fastembed model download (~23 MB) — run with --ignored locally"]
 async fn test_index_search_and_registry() {
     // ── setup backends ────────────────────────────────────────────────────────
     let embedder = Arc::new(FastEmbedder::new().expect("FastEmbedder"));
