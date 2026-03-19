@@ -37,8 +37,8 @@ impl ChunkRegistry {
 
     pub fn load(&mut self, path: &Path) -> Result<(), RagError> {
         let raw = std::fs::read_to_string(path.join("chunks.json"))?;
-        self.chunks = serde_json::from_str(&raw)
-            .map_err(|e| RagError::Io(std::io::Error::other(e)))?;
+        self.chunks =
+            serde_json::from_str(&raw).map_err(|e| RagError::Io(std::io::Error::other(e)))?;
         Ok(())
     }
 }
