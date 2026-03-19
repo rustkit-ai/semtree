@@ -61,6 +61,8 @@ jobs:
 
       - name: Build (cross)
         if: matrix.cross
+        env:
+          OPENSSL_VENDORED: "1"
         run: cross build --release --target ${{ matrix.target }} -p semtree-cli
 
       - name: Package
