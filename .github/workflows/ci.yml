@@ -11,14 +11,13 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  build:
-    name: Build & Test — ${{ matrix.os }}
+  test:
+    name: Test — ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # windows-latest excluded: usearch v2 uses POSIX-only mmap (MAP_FAILED)
-        # and does not compile with MSVC. Track: https://github.com/unum-cloud/usearch/issues
+        # windows excluded: usearch v2 uses POSIX-only mmap (MAP_FAILED)
         os: [ubuntu-latest, macos-latest]
 
     steps:
@@ -29,26 +28,45 @@ jobs:
         with:
           components: rustfmt, clippy
 
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Check formatting
+      - name: fmt
         run: cargo fmt --all -- --check
 
-      - name: Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-      - name: Build
-        run: cargo build --all-targets --all-features
-
-      - name: Test
-        run: cargo test --all-features
+      - name: test
+        run: cargo test --workspace --all-features
 
   msrv:
-    name: Minimum Supported Rust Version
+    name: MSRV (1.88)
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.88
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --all-features
+      - run: cargo check --workspace --all-features
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+      - run: cargo audit
+
+  publish-dry-run:
+    name: Publish dry-run
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Dry-run publish semtree-core
+        run: cargo publish --dry-run -p semtree-core
