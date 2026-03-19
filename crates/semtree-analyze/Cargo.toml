@@ -1,10 +1,12 @@
 [package]
 name = "semtree-analyze"
-description = "Augmented static analysis: dead code, dependency graphs, complexity"
+description = "Static analysis for semtree: complexity metrics, large-function detection (alpha — more features coming)"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+# Not published yet — API is incomplete and subject to breaking changes.
+publish = false
 
 [dependencies]
 semtree-core  = { workspace = true }

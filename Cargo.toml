@@ -17,6 +17,8 @@ rust-version = "1.80"
 license = "MIT"
 authors = ["rustkit-ai"]
 repository = "https://github.com/rustkit-ai/semtree"
+keywords = ["semantic-search", "code-intelligence", "embeddings", "rag", "tree-sitter"]
+categories = ["development-tools", "text-processing"]
 
 [workspace.dependencies]
 # async
@@ -50,10 +52,10 @@ usearch = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# internal crates
-semtree-core    = { path = "crates/semtree-core" }
-semtree-parse   = { path = "crates/semtree-parse" }
-semtree-embed   = { path = "crates/semtree-embed" }
-semtree-store   = { path = "crates/semtree-store" }
-semtree-rag     = { path = "crates/semtree-rag" }
-semtree-analyze = { path = "crates/semtree-analyze" }
+# internal crates — version required for cargo publish
+semtree-core    = { path = "crates/semtree-core",    version = "0.1" }
+semtree-parse   = { path = "crates/semtree-parse",   version = "0.1" }
+semtree-embed   = { path = "crates/semtree-embed",   version = "0.1" }
+semtree-store   = { path = "crates/semtree-store",   version = "0.1" }
+semtree-rag     = { path = "crates/semtree-rag",     version = "0.1" }
+semtree-analyze = { path = "crates/semtree-analyze", version = "0.1" }

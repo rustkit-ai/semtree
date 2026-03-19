@@ -9,9 +9,46 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      # Publish in dependency order. Sleep between each to let crates.io index.
+      - name: Publish semtree-core
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-core
+      - run: sleep 25
+
+      - name: Publish semtree-embed
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-embed
+      - run: sleep 25
+
+      - name: Publish semtree-parse
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-parse
+      - run: sleep 25
+
+      - name: Publish semtree-store
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-store
+      - run: sleep 25
+
+      - name: Publish semtree-rag
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-rag
+      - run: sleep 25
+
+      - name: Publish semtree-cli
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }} -p semtree-cli
+      # semtree-analyze skipped — publish = false (alpha)
+
   build:
     name: Build — ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    needs: publish
     strategy:
       fail-fast: false
       matrix:
@@ -25,9 +62,7 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             artifact: semtree-macos-aarch64
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            artifact: semtree-windows-x86_64.exe
+          # windows-latest excluded: usearch v2 uses POSIX-only mmap (MAP_FAILED)
 
     steps:
       - uses: actions/checkout@v4
