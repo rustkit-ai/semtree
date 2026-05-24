@@ -17,7 +17,7 @@ impl Language {
         match ext {
             "rs" => Self::Rust,
             "py" => Self::Python,
-            "js" | "mjs" | "cjs" => Self::JavaScript,
+            "js" | "mjs" | "cjs" | "jsx" => Self::JavaScript,
             "ts" | "tsx" => Self::TypeScript,
             "go" => Self::Go,
             _ => Self::Unknown,

@@ -21,6 +21,11 @@ serde_json = { workspace = true }
 workspace = true
 optional = true
 
+[dependencies.reqwest]
+workspace = true
+optional = true
+
 [features]
 default = ["usearch-backend"]
 usearch-backend = ["usearch"]
+qdrant-backend = ["reqwest"]

@@ -17,7 +17,7 @@ impl Extractor for JavaScriptExtractor {
 
 fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
     match node.kind() {
-        "function_declaration" => {
+        "function_declaration" | "generator_function_declaration" => {
             let name = node
                 .child_by_field_name("name")
                 .map(|n| tree.node_text(&n).to_string());
@@ -53,6 +53,11 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
                 name,
             ))
         }
+        "export_statement" => {
+            let decl = node.child_by_field_name("declaration")?;
+            let (kind, name) = extract_decl_info(decl, tree)?;
+            Some(make_chunk(node, tree, Language::JavaScript, kind, name))
+        }
         // `const foo = function() {}` or `const foo = () => {}`
         "lexical_declaration" | "variable_declaration" => {
             let declarator = node.named_child(0)?;
@@ -71,6 +76,27 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
             } else {
                 None
             }
+        }
+        _ => None,
+    }
+}
+
+fn extract_decl_info(
+    node: Node<'_>,
+    tree: &ParsedTree,
+) -> Option<(ChunkKind, Option<String>)> {
+    match node.kind() {
+        "function_declaration" | "generator_function_declaration" => {
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some((ChunkKind::Function, name))
+        }
+        "class_declaration" => {
+            let name = node
+                .child_by_field_name("name")
+                .map(|n| tree.node_text(&n).to_string());
+            Some((ChunkKind::Class, name))
         }
         _ => None,
     }

@@ -20,6 +20,12 @@ tokio = { workspace = true }
 workspace = true
 optional = true
 
+[dependencies.reqwest]
+workspace = true
+optional = true
+
 [features]
 default = ["fastembed-backend"]
 fastembed-backend = ["fastembed"]
+openai-backend = ["reqwest"]
+ollama-backend = ["reqwest"]

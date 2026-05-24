@@ -7,6 +7,10 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(name = "semtree", about = "Semantic code intelligence")]
 struct Cli {
+    /// Path to a .semtree.toml config file (default: .semtree.toml in current dir)
+    #[arg(long, global = true)]
+    config: Option<PathBuf>,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -23,9 +27,12 @@ enum Command {
     Index {
         /// Path to the codebase to index
         path: PathBuf,
-        /// Where to store the index (default: from .semtree.toml or .semtree)
+        /// Where to store the index (default: from config or .semtree)
         #[arg(long)]
         index_dir: Option<PathBuf>,
+        /// Force full re-index, ignoring the incremental manifest
+        #[arg(long)]
+        full: bool,
     },
     /// Search the index semantically
     Search {
@@ -49,6 +56,21 @@ enum Command {
         #[arg(long)]
         index_dir: Option<PathBuf>,
     },
+    /// Show statistics about the current index
+    Stats {
+        /// Index directory
+        #[arg(long)]
+        index_dir: Option<PathBuf>,
+    },
+    /// Analyze indexed code for complexity metrics
+    Analyze {
+        /// Index directory
+        #[arg(long)]
+        index_dir: Option<PathBuf>,
+        /// Number of top results to show per section
+        #[arg(short, long, default_value_t = 15)]
+        top: usize,
+    },
 }
 
 #[tokio::main]
@@ -62,15 +84,23 @@ async fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    // Load config from current dir
     let cwd = std::env::current_dir()?;
-    let config = semtree_core::SemtreeConfig::load(&cwd);
+    let config = if let Some(config_path) = cli.config {
+        let raw = std::fs::read_to_string(&config_path)?;
+        toml::from_str(&raw)?
+    } else {
+        semtree_core::SemtreeConfig::load(&cwd)
+    };
 
     match cli.command {
         Command::Init { dir } => cmd::init::run(&dir),
-        Command::Index { path, index_dir } => {
+        Command::Index {
+            path,
+            index_dir,
+            full,
+        } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
-            cmd::index::run(&path, &index_dir, &config).await
+            cmd::index::run(&path, &index_dir, &config, full).await
         }
         Command::Search {
             query,
@@ -87,6 +117,14 @@ async fn main() -> Result<()> {
         } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
             cmd::context::run(&query, top_k, &index_dir, &config).await
+        }
+        Command::Stats { index_dir } => {
+            let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
+            cmd::stats::run(&index_dir)
+        }
+        Command::Analyze { index_dir, top } => {
+            let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
+            cmd::analyze::run(&index_dir, top)
         }
     }
 }

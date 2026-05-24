@@ -42,11 +42,14 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
             ))
         }
         "type_declaration" => {
-            // Go type declarations: struct, interface, type alias
+            // Go: type_declaration -> type_spec { name, type }
             let spec = node.named_child(0)?;
-            let kind = match spec.kind() {
-                "struct_type" | "type_spec" => ChunkKind::Struct,
-                "interface_type" => ChunkKind::Trait,
+            if spec.kind() != "type_spec" {
+                return None;
+            }
+            let type_node = spec.child_by_field_name("type");
+            let kind = match type_node.as_ref().map(|n| n.kind()) {
+                Some("interface_type") => ChunkKind::Trait,
                 _ => ChunkKind::Struct,
             };
             let name = spec

@@ -20,6 +20,14 @@ impl ChunkRegistry {
         self.chunks.get(id)
     }
 
+    pub fn remove(&mut self, id: &str) -> Option<Chunk> {
+        self.chunks.remove(id)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Chunk> {
+        self.chunks.values()
+    }
+
     pub fn len(&self) -> usize {
         self.chunks.len()
     }

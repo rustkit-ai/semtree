@@ -8,4 +8,6 @@ pub enum StoreError {
     Insert(String),
     #[error("search failed: {0}")]
     Search(String),
+    #[error("http error: {0}")]
+    Http(String),
 }

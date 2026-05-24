@@ -65,15 +65,15 @@ pub fn subtract(a: i32, b: i32) -> i32 {
     let mut registry = ChunkRegistry::default();
 
     let n_a = indexer
-        .index_file(&file_a, &mut registry)
+        .index_file(&file_a, &mut registry, None)
         .await
         .expect("index file_a");
     let n_b = indexer
-        .index_file(&file_b, &mut registry)
+        .index_file(&file_b, &mut registry, None)
         .await
         .expect("index file_b");
     let n_c = indexer
-        .index_file(&file_c, &mut registry)
+        .index_file(&file_c, &mut registry, None)
         .await
         .expect("index file_c");
 

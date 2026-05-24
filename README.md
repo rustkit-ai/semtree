@@ -14,12 +14,12 @@
 
 **Code search tools force a tradeoff.** Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well inside a Rust library or a local tool.
 
-`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in a HNSW vector index — all on-device, no API key, no daemon.
+`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in an HNSW vector index — all on-device, no API key required, no daemon.
 
 ```
 $ semtree index ./my-project
-Indexing ./my-project...
-Done. Indexed 312 chunks → .semtree/
+⠿ [========================================] 87/87 files  (3s)
+Done (incremental). Indexed 312 chunks → .semtree/
 
 $ semtree search "how is authentication handled"
 1. [Function] validate_token  (score: 0.921)
@@ -29,9 +29,21 @@ $ semtree search "how is authentication handled"
 2. [Function] middleware  (score: 0.887)
    src/auth/middleware.rs:28
    pub async fn middleware(req: Request, next: Next) -> Response {
+
+$ semtree stats
+=== Index: .semtree ===
+
+  Chunks : 312
+  Files  : 87
+  Size   : 1.8 MB
+
+By language:
+  rust:          200  (64%)
+  typescript:     80  (26%)
+  go:             32  (10%)
 ```
 
-**No API key. No server. No Python.** Embeddings run on CPU via ONNX, cached after first use.
+**No daemon. No Python.** Embeddings run on CPU via ONNX, cached after first use. Supports OpenAI and Ollama as drop-in embedding backends when you need higher quality.
 
 ---
 
@@ -55,11 +67,56 @@ semtree-store = "0.1"
 ## CLI
 
 ```bash
-semtree init                                  # create .semtree.toml config
-semtree index ./my-project                    # parse + embed + store
-semtree search "error handling strategy" -k 5 # semantic search
-semtree context "authentication flow"         # RAG context block for LLMs
+semtree init                                   # create .semtree.toml
+semtree index ./my-project                     # index (incremental by default)
+semtree index ./my-project --full              # force full re-scan
+semtree search "error handling strategy" -k 5  # semantic search
+semtree context "authentication flow"          # RAG context block for LLMs
+semtree stats                                  # chunks, languages, index size
+semtree analyze                                # complexity metrics, largest functions
 ```
+
+All commands accept `--config <path>` to point to a custom `.semtree.toml`.
+
+### Incremental indexing
+
+Re-running `semtree index` only processes files whose content has changed. A manifest (`manifest.json`) is stored alongside the index to track per-file hashes. Pass `--full` to force a complete re-scan.
+
+---
+
+## Configuration
+
+`semtree init` creates a `.semtree.toml` in the current directory:
+
+```toml
+[embed]
+backend = "fastembed"   # fastembed | openai | ollama
+# model   = "text-embedding-3-small"
+# url     = "http://localhost:11434"   # ollama only
+# api_key = "sk-..."                   # or set OPENAI_API_KEY
+
+[store]
+backend    = "usearch"   # usearch | qdrant
+# url        = "http://localhost:6333"
+# collection = "semtree"
+
+index_dir = ".semtree"
+```
+
+### Embedding backends
+
+| Backend | Default model | Notes |
+|---|---|---|
+| `fastembed` (default) | `AllMiniLML6V2` (384-dim) | On-device, no key needed |
+| `openai` | `text-embedding-3-small` | Set `OPENAI_API_KEY` or `embed.api_key` |
+| `ollama` | `nomic-embed-text` | Requires local Ollama server |
+
+### Vector store backends
+
+| Backend | Notes |
+|---|---|
+| `usearch` (default) | In-process HNSW, saved to disk |
+| `qdrant` | Remote Qdrant server — set `QDRANT_URL` or `store.url` |
 
 ---
 
@@ -69,7 +126,7 @@ semtree context "authentication flow"         # RAG context block for LLMs
 use std::sync::Arc;
 use semtree_embed::fastembed::FastEmbedder;
 use semtree_store::usearch::UsearchStore;
-use semtree_rag::{ChunkRegistry, Indexer, SearchEngine};
+use semtree_rag::{ChunkRegistry, FileManifest, Indexer, SearchEngine};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -78,8 +135,14 @@ async fn main() -> anyhow::Result<()> {
 
     let indexer = Indexer::new(embedder.clone(), store.clone());
     let mut registry = ChunkRegistry::default();
-    let n = indexer.index_dir("./src".as_ref(), &mut registry).await?;
-    println!("Indexed {n} chunks");
+    let mut manifest = FileManifest::default();
+
+    let n = indexer
+        .index_dir("./src".as_ref(), &mut registry, Some(&mut manifest), |done, total| {
+            eprint!("\r{done}/{total}");
+        })
+        .await?;
+    println!("\nIndexed {n} chunks");
 
     let engine = SearchEngine::new(embedder, store);
     let hits = engine.search("error handling", 5).await?;
@@ -105,9 +168,10 @@ Each crate is independently published to [crates.io](https://crates.io) — use 
 ```
 semtree-core     # shared types: Language, Span, Chunk, ChunkKind
 semtree-parse    # tree-sitter parsing + chunk extraction
-semtree-embed    # Embedder trait + fastembed backend
-semtree-store    # VectorStore trait + usearch backend
-semtree-rag      # index, search, and LLM context pipeline
+semtree-embed    # Embedder trait + fastembed / OpenAI / Ollama backends
+semtree-store    # VectorStore trait + usearch / Qdrant backends
+semtree-rag      # index, search, LLM context, incremental manifest
+semtree-analyze  # complexity metrics, large-function detection
 semtree-cli      # CLI binary (semtree)
 ```
 
@@ -117,11 +181,13 @@ semtree-cli      # CLI binary (semtree)
 
 | Language   | Parse | Extract |
 |---|---|---|
-| Rust       | ✅ | ✅ |
-| Python     | ✅ | 🚧 |
-| TypeScript | ✅ | 🚧 |
-| JavaScript | ✅ | 🚧 |
-| Go         | ✅ | 🚧 |
+| Rust       | ✅ | ✅ functions, structs, enums, traits, impls, modules |
+| Python     | ✅ | ✅ functions, classes, decorators |
+| TypeScript | ✅ | ✅ functions, classes, interfaces, enums, type aliases, exports |
+| JavaScript | ✅ | ✅ functions, classes, generators, exports |
+| Go         | ✅ | ✅ functions, methods, structs, interfaces |
+
+Plain text files (`.md`, `.json`, `.toml`, `.yaml`, …) are chunked into overlapping 40-line windows.
 
 ---
 
@@ -154,6 +220,9 @@ impl VectorStore for MyStore {
     async fn insert(&self, id: &str, emb: &Embedding) -> Result<(), StoreError> { todo!() }
     async fn search(&self, query: &Embedding, top_k: usize) -> Result<Vec<Hit>, StoreError> { todo!() }
     async fn delete(&self, id: &str) -> Result<(), StoreError> { todo!() }
+    fn save(&self, _path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
+    fn load(&mut self, _path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
+    fn len(&self) -> usize { 0 }
 }
 ```
 

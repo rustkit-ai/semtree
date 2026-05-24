@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT"
@@ -52,10 +52,16 @@ usearch = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# http (OpenAI, Ollama, Qdrant backends)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# cli progress
+indicatif = "0.17"
+
 # internal crates — version required for cargo publish
-semtree-core    = { path = "crates/semtree-core",    version = "0.1" }
-semtree-parse   = { path = "crates/semtree-parse",   version = "0.1" }
-semtree-embed   = { path = "crates/semtree-embed",   version = "0.1" }
-semtree-store   = { path = "crates/semtree-store",   version = "0.1" }
-semtree-rag     = { path = "crates/semtree-rag",     version = "0.1" }
-semtree-analyze = { path = "crates/semtree-analyze", version = "0.1" }
+semtree-core    = { path = "crates/semtree-core",    version = "0.2" }
+semtree-parse   = { path = "crates/semtree-parse",   version = "0.2" }
+semtree-embed   = { path = "crates/semtree-embed",   version = "0.2" }
+semtree-store   = { path = "crates/semtree-store",   version = "0.2" }
+semtree-rag     = { path = "crates/semtree-rag",     version = "0.2" }
+semtree-analyze = { path = "crates/semtree-analyze", version = "0.2" }

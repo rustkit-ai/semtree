@@ -24,8 +24,10 @@ pub struct EmbedConfig {
     pub backend: EmbedBackend,
     /// Model name — defaults depend on backend
     pub model: Option<String>,
-    /// Base URL — for Ollama
+    /// Base URL — for Ollama (default: http://localhost:11434)
     pub url: Option<String>,
+    /// API key — falls back to OPENAI_API_KEY env var for openai backend
+    pub api_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

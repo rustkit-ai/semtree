@@ -1,26 +1,58 @@
 use std::path::Path;
 
 use anyhow::Result;
+use indicatif::{ProgressBar, ProgressStyle};
 use semtree_core::SemtreeConfig;
-use semtree_rag::{ChunkRegistry, Indexer};
+use semtree_rag::{ChunkRegistry, FileManifest, Indexer};
 
 use super::make_backends;
 
-pub async fn run(path: &Path, index_dir: &Path, config: &SemtreeConfig) -> Result<()> {
+pub async fn run(path: &Path, index_dir: &Path, config: &SemtreeConfig, full: bool) -> Result<()> {
     std::fs::create_dir_all(index_dir)?;
 
     let backends = make_backends(config)?;
     let store = backends.store;
     let mut registry = ChunkRegistry::default();
 
+    let mut manifest = if full {
+        FileManifest::default()
+    } else {
+        FileManifest::load(index_dir)
+    };
+
+    // Pre-load existing index if doing incremental update
+    if !full && index_dir.join("index.usearch").exists() {
+        std::sync::Arc::get_mut(&mut store.clone())
+            .map(|s| s.load(index_dir).ok());
+        registry.load(index_dir).ok();
+    }
+
+    let file_count = semtree_rag::collect_indexable_files(path).len();
+
+    let bar = ProgressBar::new(file_count as u64);
+    bar.set_style(
+        ProgressStyle::with_template(
+            "{spinner:.cyan} [{bar:40.cyan/blue}] {pos}/{len} files  ({elapsed})",
+        )
+        .unwrap()
+        .progress_chars("=>-"),
+    );
+
     let indexer = Indexer::new(backends.embedder, store.clone());
 
-    println!("Indexing {}...", path.display());
-    let n = indexer.index_dir(path, &mut registry).await?;
+    let n = indexer
+        .index_dir(path, &mut registry, Some(&mut manifest), |done, _total| {
+            bar.set_position(done as u64);
+        })
+        .await?;
+
+    bar.finish_and_clear();
 
     store.save(index_dir)?;
     registry.save(index_dir)?;
+    manifest.save(index_dir)?;
 
-    println!("Done. Indexed {n} chunks → {}", index_dir.display());
+    let mode = if full { "full" } else { "incremental" };
+    println!("Done ({mode}). Indexed {n} chunks → {}", index_dir.display());
     Ok(())
 }
