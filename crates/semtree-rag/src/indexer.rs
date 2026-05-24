@@ -111,11 +111,7 @@ impl Indexer {
 
         // Remove manifest entries for files that no longer exist
         if let Some(ref mut m) = manifest {
-            let stale: Vec<PathBuf> = m
-                .paths()
-                .filter(|p| !p.exists())
-                .cloned()
-                .collect();
+            let stale: Vec<PathBuf> = m.paths().filter(|p| !p.exists()).cloned().collect();
             for path in stale {
                 for old_id in m.chunk_ids(&path).to_vec() {
                     registry.remove(&old_id);

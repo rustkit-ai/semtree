@@ -81,10 +81,7 @@ fn visit(node: &Node<'_>, tree: &ParsedTree) -> Option<Chunk> {
     }
 }
 
-fn extract_decl_info(
-    node: Node<'_>,
-    tree: &ParsedTree,
-) -> Option<(ChunkKind, Option<String>)> {
+fn extract_decl_info(node: Node<'_>, tree: &ParsedTree) -> Option<(ChunkKind, Option<String>)> {
     match node.kind() {
         "function_declaration" | "generator_function_declaration" => {
             let name = node

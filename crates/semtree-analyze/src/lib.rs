@@ -27,7 +27,11 @@ pub fn analyze_chunks(chunks: &[Chunk]) -> Vec<ComplexityReport> {
         })
         .collect();
 
-    reports.sort_by(|a, b| b.cyclomatic.cmp(&a.cyclomatic).then(b.line_count.cmp(&a.line_count)));
+    reports.sort_by(|a, b| {
+        b.cyclomatic
+            .cmp(&a.cyclomatic)
+            .then(b.line_count.cmp(&a.line_count))
+    });
     reports
 }
 
@@ -45,20 +49,17 @@ pub fn find_large_functions(chunks: &[Chunk], threshold: usize) -> Vec<&Chunk> {
 pub fn cyclomatic_complexity(content: &str, language: Language) -> usize {
     let keywords: &[&str] = match language {
         Language::Rust => &[
-            " if ", " else ", " while ", " for ", " loop ", " match ",
-            " && ", " || ", " => ",
+            " if ", " else ", " while ", " for ", " loop ", " match ", " && ", " || ", " => ",
         ],
         Language::Python => &[
-            " if ", " elif ", "else:", " while ", " for ", " except",
-            " and ", " or ",
+            " if ", " elif ", "else:", " while ", " for ", " except", " and ", " or ",
         ],
         Language::TypeScript | Language::JavaScript => &[
-            " if ", " else ", " while ", " for ", " switch ", " case ",
-            " catch ", " && ", " || ", " ?? ",
+            " if ", " else ", " while ", " for ", " switch ", " case ", " catch ", " && ", " || ",
+            " ?? ",
         ],
         Language::Go => &[
-            " if ", " else ", " for ", " switch ", " case ",
-            " && ", " || ",
+            " if ", " else ", " for ", " switch ", " case ", " && ", " || ",
         ],
         Language::Unknown => &[],
     };

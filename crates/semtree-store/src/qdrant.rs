@@ -82,10 +82,9 @@ impl QdrantStore {
 
     fn chunk_id_to_u64(id: &str) -> u64 {
         u64::from_str_radix(id, 16).unwrap_or_else(|_| {
-            id.bytes()
-                .fold(0xcbf29ce484222325u64, |acc, b| {
-                    acc.wrapping_mul(0x100000001b3).wrapping_add(b as u64)
-                })
+            id.bytes().fold(0xcbf29ce484222325u64, |acc, b| {
+                acc.wrapping_mul(0x100000001b3).wrapping_add(b as u64)
+            })
         })
     }
 }

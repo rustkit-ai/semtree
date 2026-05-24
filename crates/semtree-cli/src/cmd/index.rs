@@ -22,8 +22,7 @@ pub async fn run(path: &Path, index_dir: &Path, config: &SemtreeConfig, full: bo
 
     // Pre-load existing index if doing incremental update
     if !full && index_dir.join("index.usearch").exists() {
-        std::sync::Arc::get_mut(&mut store.clone())
-            .map(|s| s.load(index_dir).ok());
+        std::sync::Arc::get_mut(&mut store.clone()).map(|s| s.load(index_dir).ok());
         registry.load(index_dir).ok();
     }
 
@@ -53,6 +52,9 @@ pub async fn run(path: &Path, index_dir: &Path, config: &SemtreeConfig, full: bo
     manifest.save(index_dir)?;
 
     let mode = if full { "full" } else { "incremental" };
-    println!("Done ({mode}). Indexed {n} chunks → {}", index_dir.display());
+    println!(
+        "Done ({mode}). Indexed {n} chunks → {}",
+        index_dir.display()
+    );
     Ok(())
 }

@@ -22,9 +22,7 @@ pub struct Backends {
 
 pub fn make_backends(config: &SemtreeConfig) -> Result<Backends> {
     let embedder: Arc<dyn Embedder> = match &config.embed.backend {
-        EmbedBackend::Fastembed => {
-            Arc::new(semtree_embed::fastembed::FastEmbedder::new()?)
-        }
+        EmbedBackend::Fastembed => Arc::new(semtree_embed::fastembed::FastEmbedder::new()?),
         EmbedBackend::OpenAI => {
             let key = config
                 .embed
@@ -48,9 +46,7 @@ pub fn make_backends(config: &SemtreeConfig) -> Result<Backends> {
     };
 
     let store: Arc<dyn VectorStore> = match &config.store.backend {
-        StoreBackend::Usearch => {
-            Arc::new(semtree_store::usearch::UsearchStore::new(EMBED_DIM)?)
-        }
+        StoreBackend::Usearch => Arc::new(semtree_store::usearch::UsearchStore::new(EMBED_DIM)?),
         StoreBackend::Qdrant => Arc::new(semtree_store::qdrant::QdrantStore::new(
             EMBED_DIM,
             config.store.url.clone(),

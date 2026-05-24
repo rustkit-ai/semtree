@@ -32,11 +32,7 @@ pub fn run(index_dir: &Path, top: usize) -> Result<()> {
     );
     println!("  {}", "-".repeat(80));
     for r in reports.iter().take(top) {
-        let loc = format!(
-            "{}:{}",
-            r.path.display(),
-            r.start_line
-        );
+        let loc = format!("{}:{}", r.path.display(), r.start_line);
         println!(
             "  {:<40} {:>6}  {:>5}  {}",
             truncate(&r.name, 40),
@@ -47,10 +43,7 @@ pub fn run(index_dir: &Path, top: usize) -> Result<()> {
     }
 
     println!("\nTop {top} by line count:");
-    println!(
-        "  {:<40} {:>5}  {}",
-        "name", "lines", "location"
-    );
+    println!("  {:<40} {:>5}  {}", "name", "lines", "location");
     println!("  {}", "-".repeat(70));
     let mut by_lines = reports.clone();
     by_lines.sort_by(|a, b| b.line_count.cmp(&a.line_count));
