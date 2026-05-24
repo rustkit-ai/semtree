@@ -26,10 +26,7 @@ pub fn run(index_dir: &Path, top: usize) -> Result<()> {
     println!("=== Complexity analysis: {} ===\n", index_dir.display());
 
     println!("Top {top} by cyclomatic complexity (approximate):");
-    println!(
-        "  {:<40} {:>6}  {:>5}  {}",
-        "name", "cc", "lines", "location"
-    );
+    println!("  {:<40} {:>6}  {:>5}  location", "name", "cc", "lines");
     println!("  {}", "-".repeat(80));
     for r in reports.iter().take(top) {
         let loc = format!("{}:{}", r.path.display(), r.start_line);
@@ -43,10 +40,10 @@ pub fn run(index_dir: &Path, top: usize) -> Result<()> {
     }
 
     println!("\nTop {top} by line count:");
-    println!("  {:<40} {:>5}  {}", "name", "lines", "location");
+    println!("  {:<40} {:>5}  location", "name", "lines");
     println!("  {}", "-".repeat(70));
     let mut by_lines = reports.clone();
-    by_lines.sort_by(|a, b| b.line_count.cmp(&a.line_count));
+    by_lines.sort_by_key(|r| std::cmp::Reverse(r.line_count));
     for r in by_lines.iter().take(top) {
         let loc = format!("{}:{}", r.path.display(), r.start_line);
         println!(
