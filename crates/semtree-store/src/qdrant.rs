@@ -169,15 +169,15 @@ impl VectorStore for QdrantStore {
         let hits = result
             .result
             .into_iter()
-            .filter_map(|h| {
+            .map(|h| {
                 let chunk_id = h
                     .payload
                     .and_then(|p| p["chunk_id"].as_str().map(|s| s.to_string()))
                     .unwrap_or_else(|| format!("{:x}", h.id));
-                Some(Hit {
+                Hit {
                     id: chunk_id,
                     score: h.score,
-                })
+                }
             })
             .collect();
 
