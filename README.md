@@ -15,11 +15,11 @@
 
 ---
 
-**Code search tools force a tradeoff.** Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well *inside* a program you're building.
+Code search tools force a tradeoff. Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well inside a program you're building.
 
-`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in an HNSW vector index - all on-device, no API key required, no daemon. Search is **hybrid** by default: it fuses vector similarity with BM25 keyword matching, so it catches concepts a grep misses *and* keeps the exact-identifier precision a pure vector search loses.
+`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in an HNSW vector index, all on-device, no API key required, no daemon. Search is hybrid by default: it fuses vector similarity with BM25 keyword matching, so it catches concepts a grep misses and keeps the exact-identifier precision a pure vector search loses.
 
-Unlike the monolithic tools in this space, semtree ships as **small composable crates** with clean traits (`Embedder`, `VectorStore`) - so you can drop the pipeline into your own tool, an [MCP](https://modelcontextprotocol.io) server, or an LLM context provider. The `semtree` CLI is just the thinnest wrapper over that library. → [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs)
+Most tools in this space ship as one monolithic binary. semtree is instead a set of small crates with clean traits (`Embedder`, `VectorStore`), so you can drop the pipeline into your own tool, an [MCP](https://modelcontextprotocol.io) server, or an LLM context provider. The `semtree` CLI is just the thinnest wrapper over that library. See [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs).
 
 ```
 $ semtree index ./my-project
@@ -229,15 +229,15 @@ semtree-cli      # CLI binary (semtree)
 
 ## Supported languages
 
-| Language   | Parse | Extract |
-|---|---|---|
-| Rust       | ✅ | ✅ functions, structs, enums, traits, impls, modules |
-| Python     | ✅ | ✅ functions, classes, decorators |
-| TypeScript | ✅ | ✅ functions, classes, interfaces, enums, type aliases, exports |
-| JavaScript | ✅ | ✅ functions, classes, generators, exports |
-| Go         | ✅ | ✅ functions, methods, structs, interfaces |
+| Language   | Extracted chunks |
+|---|---|
+| Rust       | functions, structs, enums, traits, impls, modules |
+| Python     | functions, classes, decorators |
+| TypeScript | functions, classes, interfaces, enums, type aliases, exports |
+| JavaScript | functions, classes, generators, exports |
+| Go         | functions, methods, structs, interfaces |
 
-Plain text files (`.md`, `.json`, `.toml`, `.yaml`, …) are chunked into overlapping 40-line windows.
+Plain text files (`.md`, `.json`, `.toml`, `.yaml`, ...) are chunked into overlapping 40-line windows.
 
 ---
 
@@ -260,6 +260,7 @@ impl Embedder for MyEmbedder {
 
 **Custom vector store:**
 ```rust
+use async_trait::async_trait;
 use semtree_store::{VectorStore, Hit, StoreError};
 use semtree_embed::Embedding;
 
