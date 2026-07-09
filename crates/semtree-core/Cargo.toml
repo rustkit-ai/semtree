@@ -1,6 +1,7 @@
 [package]
 name = "semtree-core"
 description = "Core types for semtree: Language, Span, Node, Chunk"
+readme = "README.md"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1]
+
+### Documentation
+
+- Added a per-crate `README.md` for all seven crates, each rendered on its crates.io page via the new `readme` manifest field
+- No code changes; this release also backfills `semtree-cli` (previously 0.1.0) and publishes `semtree-analyze` for the first time
+
 ## [0.2.0]
 
 ### Breaking changes
