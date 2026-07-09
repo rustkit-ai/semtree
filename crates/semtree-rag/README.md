@@ -73,3 +73,5 @@ Passing a `FileManifest` to `index_dir` makes re-runs process only files whose c
 ## License
 
 MIT
+
+Part of [rustkit-ai](https://github.com/rustkit-ai) - open source Rust tools for the AI development era.

@@ -52,3 +52,5 @@ impl VectorStore for MyStore {
 ## License
 
 MIT
+
+Part of [rustkit-ai](https://github.com/rustkit-ai) - open source Rust tools for the AI development era.

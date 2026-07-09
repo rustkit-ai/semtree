@@ -47,3 +47,5 @@ Re-running `semtree index` only processes files whose content changed, tracked b
 ## License
 
 MIT
+
+Part of [rustkit-ai](https://github.com/rustkit-ai) - open source Rust tools for the AI development era.

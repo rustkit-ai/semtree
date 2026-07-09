@@ -31,3 +31,5 @@ You rarely depend on this crate directly, since it comes in transitively via `se
 ## License
 
 MIT. See the [workspace README](https://github.com/rustkit-ai/semtree) for the full picture.
+
+Part of [rustkit-ai](https://github.com/rustkit-ai) - open source Rust tools for the AI development era.
