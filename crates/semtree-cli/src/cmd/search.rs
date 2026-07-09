@@ -102,10 +102,10 @@ pub async fn run(
             if !kinds.is_empty() && !kinds.contains(&chunk.kind) {
                 return false;
             }
-            if let Some(p) = path_filter {
-                if !chunk.path.display().to_string().contains(p) {
-                    return false;
-                }
+            if let Some(p) = path_filter
+                && !chunk.path.display().to_string().contains(p)
+            {
+                return false;
             }
             true
         })

@@ -32,11 +32,11 @@ impl Indexer {
             }
         };
 
-        if let Some(ref manifest) = manifest {
-            if !manifest.is_changed(path, &content) {
-                debug!("unchanged, skipping {}", path.display());
-                return Ok(0);
-            }
+        if let Some(ref manifest) = manifest
+            && !manifest.is_changed(path, &content)
+        {
+            debug!("unchanged, skipping {}", path.display());
+            return Ok(0);
         }
 
         // Remove stale chunks for this file before re-indexing
