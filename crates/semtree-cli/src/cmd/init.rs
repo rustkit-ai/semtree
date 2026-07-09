@@ -15,8 +15,8 @@ pub fn run(dir: &Path) -> Result<()> {
     println!();
     println!("Edit .semtree.toml to configure your embed backend and vector store.");
     println!("Credentials go in environment variables:");
-    println!("  OPENAI_API_KEY   — for openai embed backend");
-    println!("  QDRANT_URL       — for qdrant store backend");
+    println!("  OPENAI_API_KEY   - for openai embed backend");
+    println!("  QDRANT_URL       - for qdrant store backend");
 
     Ok(())
 }

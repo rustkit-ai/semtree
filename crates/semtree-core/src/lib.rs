@@ -1,3 +1,9 @@
+//! **Core data types shared across the semtree crates.**
+//!
+//! No logic, no I/O - just the vocabulary every other crate speaks:
+//! [`Chunk`] and [`ChunkKind`] (a unit of indexed code), [`Language`],
+//! [`Span`] (byte + line range), and the [`SemtreeConfig`] tree.
+
 pub mod chunk;
 pub mod config;
 pub mod language;

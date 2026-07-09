@@ -22,11 +22,11 @@ pub enum StoreBackend {
 pub struct EmbedConfig {
     #[serde(default)]
     pub backend: EmbedBackend,
-    /// Model name — defaults depend on backend
+    /// Model name - defaults depend on backend
     pub model: Option<String>,
-    /// Base URL — for Ollama (default: http://localhost:11434)
+    /// Base URL - for Ollama (default: http://localhost:11434)
     pub url: Option<String>,
-    /// API key — falls back to OPENAI_API_KEY env var for openai backend
+    /// API key - falls back to OPENAI_API_KEY env var for openai backend
     pub api_key: Option<String>,
 }
 

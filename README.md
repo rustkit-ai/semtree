@@ -1,20 +1,25 @@
 <h1 align="center">semtree</h1>
 
 <p align="center">
-  Semantic code intelligence for any codebase — parse, embed, search, inject.
+  On-device semantic code intelligence - a composable Rust library <em>and</em> a CLI.<br/>
+  Parse, embed, and search any codebase by meaning. No daemon, no API key.
 </p>
 
 <p align="center">
   <a href="https://github.com/rustkit-ai/semtree/actions/workflows/ci.yml"><img src="https://github.com/rustkit-ai/semtree/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="https://crates.io/crates/semtree-rag"><img src="https://img.shields.io/crates/v/semtree-rag.svg" alt="crates.io"/></a>
+  <a href="https://docs.rs/semtree-rag"><img src="https://img.shields.io/docsrs/semtree-rag.svg" alt="docs.rs"/></a>
+  <a href="https://crates.io/crates/semtree-cli"><img src="https://img.shields.io/crates/d/semtree-cli.svg" alt="downloads"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"/></a>
 </p>
 
 ---
 
-**Code search tools force a tradeoff.** Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well inside a Rust library or a local tool.
+**Code search tools force a tradeoff.** Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well *inside* a program you're building.
 
-`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in an HNSW vector index — all on-device, no API key required, no daemon.
+`semtree` uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your codebase into structured chunks (functions, structs, methods), embeds them locally via [fastembed](https://github.com/Anush008/fastembed-rs), and stores them in an HNSW vector index - all on-device, no API key required, no daemon. Search is **hybrid** by default: it fuses vector similarity with BM25 keyword matching, so it catches concepts a grep misses *and* keeps the exact-identifier precision a pure vector search loses.
+
+Unlike the monolithic tools in this space, semtree ships as **small composable crates** with clean traits (`Embedder`, `VectorStore`) - so you can drop the pipeline into your own tool, an [MCP](https://modelcontextprotocol.io) server, or an LLM context provider. The `semtree` CLI is just the thinnest wrapper over that library. → [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs)
 
 ```
 $ semtree index ./my-project
@@ -57,9 +62,9 @@ cargo install semtree-cli
 **Library:**
 ```toml
 [dependencies]
-semtree-rag   = "0.1"
-semtree-embed = "0.1"
-semtree-store = "0.1"
+semtree-rag   = "0.3"   # pipeline: index, hybrid search, LLM context
+semtree-embed = "0.3"   # Embedder trait + fastembed / OpenAI / Ollama
+semtree-store = "0.3"   # VectorStore trait + usearch / Qdrant
 ```
 
 ---
@@ -70,10 +75,19 @@ semtree-store = "0.1"
 semtree init                                   # create .semtree.toml
 semtree index ./my-project                     # index (incremental by default)
 semtree index ./my-project --full              # force full re-scan
-semtree search "error handling strategy" -k 5  # semantic search
+semtree search "error handling strategy" -k 5  # hybrid search (default)
 semtree context "authentication flow"          # RAG context block for LLMs
 semtree stats                                  # chunks, languages, index size
 semtree analyze                                # complexity metrics, largest functions
+```
+
+**Search modes and filters:**
+```bash
+semtree search "retry logic" --mode semantic   # vector similarity only
+semtree search "retry logic" --mode lexical    # BM25 keyword only
+semtree search "retry logic" --mode hybrid     # fused (default)
+semtree search "parse" --lang rust --kind fn   # filter by language / chunk kind
+semtree search "config" --path src/settings    # filter by path substring
 ```
 
 All commands accept `--config <path>` to point to a custom `.semtree.toml`.
@@ -116,39 +130,43 @@ index_dir = ".semtree"
 | Backend | Notes |
 |---|---|
 | `usearch` (default) | In-process HNSW, saved to disk |
-| `qdrant` | Remote Qdrant server — set `QDRANT_URL` or `store.url` |
+| `qdrant` | Remote Qdrant server - set `QDRANT_URL` or `store.url` |
 
 ---
 
 ## Library
 
+Assemble the pipeline from its building blocks - backends are traits, so
+`FastEmbedder`/`UsearchStore` swap for OpenAI/Ollama/Qdrant without touching the
+rest. Full runnable version: [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs).
+
 ```rust
 use std::sync::Arc;
 use semtree_embed::fastembed::FastEmbedder;
 use semtree_store::usearch::UsearchStore;
-use semtree_rag::{ChunkRegistry, FileManifest, Indexer, SearchEngine};
+use semtree_rag::{ChunkRegistry, HybridSearcher, Indexer, LexicalIndex, SearchEngine, SearchMode};
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let embedder = Arc::new(FastEmbedder::new()?);
     let store    = Arc::new(UsearchStore::new(384)?);
 
-    let indexer = Indexer::new(embedder.clone(), store.clone());
+    // Index: parse -> chunk -> embed -> store.
     let mut registry = ChunkRegistry::default();
-    let mut manifest = FileManifest::default();
-
-    let n = indexer
-        .index_dir("./src".as_ref(), &mut registry, Some(&mut manifest), |done, total| {
+    Indexer::new(embedder.clone(), store.clone())
+        .index_dir("./src".as_ref(), &mut registry, None, |done, total| {
             eprint!("\r{done}/{total}");
         })
         .await?;
-    println!("\nIndexed {n} chunks");
 
-    let engine = SearchEngine::new(embedder, store);
-    let hits = engine.search("error handling", 5).await?;
-    for hit in &hits {
+    // Hybrid search: vector similarity fused with BM25 keyword matching.
+    let engine   = SearchEngine::new(embedder, store);
+    let lexical  = LexicalIndex::from_chunks(registry.iter());
+    let searcher = HybridSearcher::new(engine, lexical);
+
+    for hit in searcher.search("error handling", 5, SearchMode::Hybrid).await? {
         if let Some(chunk) = registry.get(&hit.id) {
-            println!("{} — {}:{} (score: {:.3})",
+            println!("{} - {}:{} (score: {:.3})",
                 chunk.name.as_deref().unwrap_or("?"),
                 chunk.path.display(),
                 chunk.span.start_line + 1,
@@ -159,11 +177,43 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
+Run it against this repo:
+
+```bash
+cargo run --example build_your_own -- ./src "how are errors handled"
+```
+
+---
+
+## Use it as an MCP server
+
+Because the pipeline is a library, wrapping it as a [Model Context Protocol](https://modelcontextprotocol.io) server - so Claude Code, Cursor, Windsurf, or Zed can search your codebase locally - takes ~100 lines. A complete, runnable one lives in [`examples/mcp-server`](examples/mcp-server):
+
+```bash
+semtree index ./my-project                       # writes ./.semtree
+cargo run -p semtree-mcp-example -- ./.semtree    # serve over stdio
+```
+
+Register it with your agent (e.g. Claude Code's `mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "semtree": {
+      "command": "semtree-mcp-example",
+      "args": ["/abs/path/to/.semtree"]
+    }
+  }
+}
+```
+
+The agent then gets a `search_code` tool that finds functions, structs, and methods by meaning - no code leaves the machine, no API key.
+
 ---
 
 ## Architecture
 
-Each crate is independently published to [crates.io](https://crates.io) — use only what you need.
+Each crate is independently published to [crates.io](https://crates.io) - use only what you need.
 
 ```
 semtree-core     # shared types: Language, Span, Chunk, ChunkKind
@@ -230,4 +280,4 @@ impl VectorStore for MyStore {
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT - see [LICENSE](LICENSE)

@@ -8,10 +8,11 @@ members = [
     "crates/semtree-rag",
     "crates/semtree-analyze",
     "crates/semtree-cli",
+    "examples/mcp-server",
 ]
 
 [workspace.package]
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT"
@@ -59,9 +60,9 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 indicatif = "0.17"
 
 # internal crates — version required for cargo publish
-semtree-core    = { path = "crates/semtree-core",    version = "0.2" }
-semtree-parse   = { path = "crates/semtree-parse",   version = "0.2" }
-semtree-embed   = { path = "crates/semtree-embed",   version = "0.2" }
-semtree-store   = { path = "crates/semtree-store",   version = "0.2" }
-semtree-rag     = { path = "crates/semtree-rag",     version = "0.2" }
-semtree-analyze = { path = "crates/semtree-analyze", version = "0.2" }
+semtree-core    = { path = "crates/semtree-core",    version = "0.3" }
+semtree-parse   = { path = "crates/semtree-parse",   version = "0.3" }
+semtree-embed   = { path = "crates/semtree-embed",   version = "0.3" }
+semtree-store   = { path = "crates/semtree-store",   version = "0.3" }
+semtree-rag     = { path = "crates/semtree-rag",     version = "0.3" }
+semtree-analyze = { path = "crates/semtree-analyze", version = "0.3" }

@@ -44,6 +44,21 @@ enum Command {
         /// Index directory
         #[arg(long)]
         index_dir: Option<PathBuf>,
+        /// Filter by language (comma-separated): rust, python, javascript, typescript, go
+        #[arg(long = "lang", value_delimiter = ',')]
+        lang: Vec<String>,
+        /// Filter by chunk kind (comma-separated): function, method, struct, enum, trait, impl, module, class, file
+        #[arg(long = "kind", value_delimiter = ',')]
+        kind: Vec<String>,
+        /// Filter by path substring
+        #[arg(long)]
+        path: Option<String>,
+        /// Matching strategy: hybrid (default), semantic, or lexical
+        #[arg(long, default_value = "hybrid")]
+        mode: String,
+        /// Output results as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Build a RAG context prompt for a query
     Context {
@@ -55,6 +70,9 @@ enum Command {
         /// Index directory
         #[arg(long)]
         index_dir: Option<PathBuf>,
+        /// Output the full context window as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Show statistics about the current index
     Stats {
@@ -106,17 +124,28 @@ async fn main() -> Result<()> {
             query,
             top_k,
             index_dir,
+            lang,
+            kind,
+            path,
+            mode,
+            json,
         } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
-            cmd::search::run(&query, top_k, &index_dir, &config).await
+            let filters = cmd::search::SearchFilters {
+                langs: lang,
+                kinds: kind,
+                path,
+            };
+            cmd::search::run(&query, top_k, &index_dir, &config, &filters, &mode, json).await
         }
         Command::Context {
             query,
             top_k,
             index_dir,
+            json,
         } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));
-            cmd::context::run(&query, top_k, &index_dir, &config).await
+            cmd::context::run(&query, top_k, &index_dir, &config, json).await
         }
         Command::Stats { index_dir } => {
             let index_dir = index_dir.unwrap_or_else(|| PathBuf::from(&config.index_dir));

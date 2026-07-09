@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0]
+
+### New features
+
+**Hybrid search** (`semtree-rag`)
+- `HybridSearcher` fuses vector similarity (`SearchEngine`) with BM25 keyword matching (`LexicalIndex`) via reciprocal rank fusion - catches concepts a grep misses while keeping exact-identifier precision
+- `SearchMode` selects `Hybrid` (default), `Semantic`, or `Lexical`
+- `LexicalIndex::from_chunks` builds an in-memory BM25 index from a chunk registry
+
+**CLI** (`semtree-cli`)
+- `semtree search --mode hybrid|semantic|lexical` (defaults to hybrid)
+- `semtree search --lang / --kind / --path` filters, applied after the vector lookup
+
+### Documentation
+
+- Crate-level docs (`//!`) on all six library crates - each now has a pitch, a components table, and an example rendered on docs.rs
+- New runnable example `semtree-rag/examples/build_your_own.rs` - assemble the pipeline from its building blocks
+- New example crate `examples/mcp-server` - expose semtree as a Model Context Protocol server (tool `search_code`) for AI agents, using the `rmcp` SDK over stdio
+- README: composable-library positioning, hybrid-search callout, MCP-server section, docs.rs/downloads badges
+
 ## [0.2.1]
 
 ### Documentation

@@ -1,3 +1,16 @@
+//! **Lightweight static analysis over indexed chunks.**
+//!
+//! Reuses the same [`Chunk`]s semtree already parses to
+//! surface complexity hotspots - no second parse. Pair it with semantic search
+//! to answer "where is the *risky* code?" as well as "where is the auth code?".
+//!
+//! - [`analyze_chunks`] - per-chunk [`ComplexityReport`], sorted by cyclomatic complexity
+//! - [`find_large_functions`] - functions over a line threshold
+//! - [`cyclomatic_complexity`] - keyword-based approximation
+//!
+//! > **Alpha:** metrics are heuristic (keyword-counting), not a full
+//! > control-flow analysis.
+
 use semtree_core::{Chunk, ChunkKind, Language};
 use std::path::PathBuf;
 

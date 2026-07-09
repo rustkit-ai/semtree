@@ -1,3 +1,20 @@
+//! **Tree-sitter parsing and chunk extraction for semtree.**
+//!
+//! Turns source files into structured [`Chunk`]s -
+//! functions, methods, structs, classes - aligned to real syntax boundaries
+//! instead of arbitrary line windows. Supports Rust, Python, JavaScript,
+//! TypeScript and Go; non-code text falls back to fixed-size windows.
+//!
+//! ```no_run
+//! use semtree_parse::extract_file;
+//!
+//! let chunks = extract_file(std::path::Path::new("src/lib.rs"))?;
+//! for c in &chunks {
+//!     println!("{:?} {:?}", c.kind, c.name);
+//! }
+//! # Ok::<(), semtree_parse::ParseError>(())
+//! ```
+
 mod error;
 mod extractor;
 mod lang;
@@ -21,7 +38,7 @@ pub fn parse_and_extract_file(path: &std::path::Path) -> Result<Vec<Chunk>, Pars
     lang::extract(&tree).map_err(|e| ParseError::Extract(e.to_string()))
 }
 
-/// Extract chunks from any supported file — code or plain text.
+/// Extract chunks from any supported file - code or plain text.
 pub fn extract_file(path: &std::path::Path) -> Result<Vec<Chunk>, ParseError> {
     if is_text_file(path) {
         let source = std::fs::read_to_string(path)?;

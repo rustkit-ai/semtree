@@ -12,6 +12,7 @@ pub async fn run(
     top_k: usize,
     index_dir: &Path,
     config: &SemtreeConfig,
+    json: bool,
 ) -> Result<()> {
     if !index_dir.exists() {
         bail!(
@@ -31,29 +32,25 @@ pub async fn run(
 
     let engine = Arc::new(SearchEngine::new(backends.embedder, store));
     let builder = ContextBuilder::new(engine).with_max_chunks(top_k);
-    let window = builder.build(query).await?;
+    let window = builder.build(query, &registry).await?;
+
+    if json {
+        println!("{}", serde_json::to_string_pretty(&window)?);
+        return Ok(());
+    }
 
     println!("=== Context for: \"{}\" ===\n", query);
     for (i, snippet) in window.snippets.iter().enumerate() {
-        let chunk = registry.get(&snippet.chunk_id);
-        let name = chunk.and_then(|c| c.name.as_deref()).unwrap_or("?");
-        let path = chunk
-            .map(|c| c.path.display().to_string())
-            .unwrap_or_default();
-        let line = chunk.map(|c| c.span.start_line + 1).unwrap_or(0);
-
+        let name = snippet.name.as_deref().unwrap_or("?");
         println!(
-            "[{}] {} — {}:{} (score: {:.3})",
+            "[{}] {} - {}:{} (score: {:.3})",
             i + 1,
             name,
-            path,
-            line,
+            snippet.path,
+            snippet.start_line,
             snippet.score
         );
-
-        if let Some(c) = chunk {
-            println!("```\n{}\n```\n", c.content);
-        }
+        println!("```\n{}\n```\n", snippet.content);
     }
 
     println!("=== Prompt ===\n{}", window.prompt);
