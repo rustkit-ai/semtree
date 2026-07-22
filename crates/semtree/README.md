@@ -12,7 +12,7 @@ Reach for the individual crates when you want to swap a backend or trim the depe
 
 ```toml
 [dependencies]
-semtree = "0.3"
+semtree = "0.4"
 tokio   = { version = "1", features = ["full"] }
 ```
 

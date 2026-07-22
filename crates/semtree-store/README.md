@@ -8,8 +8,8 @@ Defines the `VectorStore` trait (insert, search, delete, save/load) and ships tw
 
 ```toml
 [dependencies]
-semtree-store = "0.2"
-semtree-embed = "0.2"
+semtree-store = "0.4"
+semtree-embed = "0.4"
 ```
 
 ```rust

@@ -19,7 +19,7 @@ This crate has no heavy dependencies. It defines the types every other `semtree-
 
 ```toml
 [dependencies]
-semtree-core = "0.2"
+semtree-core = "0.4"
 ```
 
 ```rust

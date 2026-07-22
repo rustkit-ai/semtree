@@ -8,8 +8,8 @@ Operates on the `Chunk`s produced by `semtree-parse`, so it reuses the same tree
 
 ```toml
 [dependencies]
-semtree-analyze = "0.2"
-semtree-parse   = "0.2"
+semtree-analyze = "0.4"
+semtree-parse   = "0.4"
 ```
 
 ```rust

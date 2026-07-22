@@ -66,15 +66,15 @@ cargo install semtree-cli
 **Library (batteries included):**
 ```toml
 [dependencies]
-semtree = "0.3"   # umbrella: default stack + prelude, one dependency
+semtree = "0.4"   # umbrella: default stack + prelude, one dependency
 ```
 
 **Library (pick your own pieces):**
 ```toml
 [dependencies]
-semtree-rag   = "0.3"   # pipeline: index, hybrid search, LLM context
-semtree-embed = "0.3"   # Embedder trait + fastembed / OpenAI / Ollama
-semtree-store = "0.3"   # VectorStore trait + usearch / Qdrant
+semtree-rag   = "0.4"   # pipeline: index, hybrid search, LLM context
+semtree-embed = "0.4"   # Embedder trait + fastembed / OpenAI / Ollama
+semtree-store = "0.4"   # VectorStore trait + usearch / Qdrant
 ```
 
 ---

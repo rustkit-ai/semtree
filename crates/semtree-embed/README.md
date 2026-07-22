@@ -8,7 +8,7 @@ Defines the `Embedder` trait and ships three implementations. The default (`fast
 
 ```toml
 [dependencies]
-semtree-embed = "0.2"
+semtree-embed = "0.4"
 ```
 
 ```rust

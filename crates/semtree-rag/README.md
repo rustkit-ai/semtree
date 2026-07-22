@@ -8,9 +8,9 @@ This is the crate most library users depend on. It ties `semtree-parse`, `semtre
 
 ```toml
 [dependencies]
-semtree-rag   = "0.2"
-semtree-embed = "0.2"
-semtree-store = "0.2"
+semtree-rag   = "0.4"
+semtree-embed = "0.4"
+semtree-store = "0.4"
 ```
 
 ```rust

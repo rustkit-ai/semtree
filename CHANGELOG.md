@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.4.0]
+
+### Breaking changes
+
+- `Embedder` now requires `dimension()` and `model_id()`, and gains `max_batch_size()` and a derived `fingerprint()`. Custom embedders must add the two required methods.
+- `VectorStore` now requires `metric()`; the crate adds a `Metric` enum.
+- `FileManifest::new` takes an embedder and a store fingerprint, and the manifest is versioned. Indexes built with 0.3 are treated as incompatible and rebuilt on the next run.
+- Chunk IDs are now `blake3(path + span)` instead of a content hash, so existing indexes rebuild.
+- `semtree-parse` drops the public `Extractor` trait; extraction is query-driven.
+
+### New features
+
+**Languages** (`semtree-parse`)
+- 20 languages, up from 5: adds Java, C, C++, C#, Ruby, PHP, TSX, Kotlin, Scala, Swift, OCaml, Solidity, Lua, Zig and Emacs Lisp.
+- Extraction is driven by tree-sitter query files (one `.scm` per language), so adding a language needs no Rust. Queries are compiled once per language and validated by a build-time test.
+
+**Umbrella crate** (`semtree`)
+- New crate re-exporting the default stack. `semtree::default_backends()` builds a fastembed embedder and a usearch store sized to it, and `semtree::prelude::*` brings in the indexing and search types.
+
+**Embedder** (`semtree-embed`)
+- `dimension()`, `model_id()` and a derived `fingerprint()` let an index reject vectors from a different model.
+- `max_batch_size()` bounds `embed()` batch sizes so a large file no longer risks memory blow-up or an oversized remote request.
+
+**Store** (`semtree-store`)
+- `Metric` enum and `VectorStore::metric()`; usearch and qdrant are metric-configurable and refuse to reopen an index under a different metric.
+
+**Incremental indexing** (`semtree-rag`)
+- The manifest is versioned (schema and chunker version, embedder and store fingerprints) and rebuilds instead of mixing incompatible vectors.
+
+### Fixes
+
+- Stable, location-scoped chunk IDs fix cross-file collisions and clean deletion of a renamed file's chunks.
+- The CLI sizes the vector store to the embedder's dimension (OpenAI/Ollama indexes were mis-sized at 384).
+- `index_dir` defaults to `.semtree` when there is no config file (it was writing into the current directory).
+- No phantom "incompatible index" warning on a first index.
+
 ## [0.3.0]
 
 ### New features

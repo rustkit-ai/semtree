@@ -8,8 +8,8 @@ Turns source files into structured `Chunk`s (functions, structs, methods, classe
 
 ```toml
 [dependencies]
-semtree-parse = "0.2"
-semtree-core  = "0.2"
+semtree-parse = "0.4"
+semtree-core  = "0.4"
 ```
 
 ```rust
