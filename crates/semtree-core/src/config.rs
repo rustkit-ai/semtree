@@ -40,7 +40,7 @@ pub struct StoreConfig {
     pub collection: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SemtreeConfig {
     #[serde(default)]
     pub embed: EmbedConfig,
@@ -49,6 +49,19 @@ pub struct SemtreeConfig {
     /// Where to store the local index
     #[serde(default = "default_index_dir")]
     pub index_dir: String,
+}
+
+// Manual `Default` so the no-config path (`SemtreeConfig::default()`) also gets
+// `.semtree`; a derived Default would leave `index_dir` empty and write the
+// index into the current directory.
+impl Default for SemtreeConfig {
+    fn default() -> Self {
+        Self {
+            embed: EmbedConfig::default(),
+            store: StoreConfig::default(),
+            index_dir: default_index_dir(),
+        }
+    }
 }
 
 fn default_index_dir() -> String {
