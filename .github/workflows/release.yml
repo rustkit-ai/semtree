@@ -129,4 +129,5 @@ jobs:
           publish semtree-store && sleep 30
           publish semtree-rag     && sleep 30
           publish semtree-analyze && sleep 30
+          publish semtree         && sleep 30
           publish semtree-cli
