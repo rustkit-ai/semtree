@@ -13,6 +13,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"/></a>
 </p>
 
+<p align="center">
+  <img src="assets/demo.gif" alt="semtree indexing a crate and answering natural-language code searches" width="860"/>
+</p>
+
 ---
 
 Code search tools force a tradeoff. Grep finds exact strings. Language servers require a running daemon and IDE integration. Cloud AI search sends your code to a third party. None of those work well inside a program you're building.
