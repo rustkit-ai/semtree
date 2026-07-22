@@ -74,6 +74,48 @@ pub fn cyclomatic_complexity(content: &str, language: Language) -> usize {
         Language::Go => &[
             " if ", " else ", " for ", " switch ", " case ", " && ", " || ",
         ],
+        Language::Java | Language::C | Language::Cpp | Language::CSharp => &[
+            " if ", " else ", " while ", " for ", " switch ", " case ", " catch ", " && ", " || ",
+        ],
+        Language::Ruby => &[
+            " if ", " elsif ", " unless ", " while ", " until ", " for ", " when ", " && ", " || ",
+            " and ", " or ",
+        ],
+        Language::Php => &[
+            " if ",
+            " else ",
+            " elseif ",
+            " while ",
+            " for ",
+            " foreach ",
+            " switch ",
+            " case ",
+            " catch ",
+            " && ",
+            " || ",
+        ],
+        // Brace/C-family control flow.
+        Language::Tsx
+        | Language::Kotlin
+        | Language::Scala
+        | Language::Swift
+        | Language::Solidity => &[
+            " if ", " else ", " while ", " for ", " when ", " match ", " case ", " catch ", " && ",
+            " || ",
+        ],
+        Language::Lua => &[
+            " if ", " elseif ", " while ", " for ", " and ", " or ", " repeat ",
+        ],
+        Language::OCaml => &[
+            " if ", " then ", " else ", " match ", " when ", " && ", " || ",
+        ],
+        Language::Zig => &[
+            " if ", " else ", " while ", " for ", " switch ", " and ", " or ", " orelse ",
+            " catch ",
+        ],
+        Language::Elisp => &[
+            "(if ", "(when ", "(unless ", "(cond ", "(and ", "(or ", "(while ",
+        ],
         Language::Unknown => &[],
     };
 

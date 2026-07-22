@@ -9,6 +9,4 @@ pub enum ParseError {
     ParseFailed,
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
-    #[error("extract error: {0}")]
-    Extract(String),
 }

@@ -225,3 +225,330 @@ fn test_chunk_text_markdown() {
         );
     }
 }
+
+// ── Helpers for the newer languages ──────────────────────────────────────────
+
+fn extract(source: &str, lang: Language) -> Vec<semtree_core::Chunk> {
+    let chunks = parse_and_extract(source, lang).expect("parse");
+    assert!(!chunks.is_empty(), "{lang} produced no chunks");
+    chunks
+}
+
+fn assert_has_kind(chunks: &[semtree_core::Chunk], kind: ChunkKind) {
+    let kinds: Vec<&ChunkKind> = chunks.iter().map(|c| &c.kind).collect();
+    assert!(kinds.contains(&&kind), "expected {kind:?} in {kinds:?}");
+}
+
+fn assert_has_name(chunks: &[semtree_core::Chunk], name: &str) {
+    let names: Vec<&str> = chunks.iter().filter_map(|c| c.name.as_deref()).collect();
+    assert!(names.contains(&name), "expected name {name:?} in {names:?}");
+}
+
+// ── Java ─────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_java_extracts_class_interface_method() {
+    let source = r#"
+interface Greeter {
+    String greet();
+}
+
+public class Hello implements Greeter {
+    public String greet() { return "hi"; }
+}
+
+enum Color { RED, GREEN }
+"#;
+    let chunks = extract(source, Language::Java);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Method);
+    assert_has_kind(&chunks, ChunkKind::Enum);
+    assert_has_name(&chunks, "Hello");
+    assert_has_name(&chunks, "greet");
+}
+
+// ── C ────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_c_extracts_function_struct_enum() {
+    let source = r#"
+struct Point { int x; int y; };
+enum Dir { NORTH, SOUTH };
+
+int add(int a, int b) {
+    return a + b;
+}
+"#;
+    let chunks = extract(source, Language::C);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_kind(&chunks, ChunkKind::Struct);
+    assert_has_kind(&chunks, ChunkKind::Enum);
+    // The function name is buried in the declarator chain, not a `name` field.
+    assert_has_name(&chunks, "add");
+    assert_has_name(&chunks, "Point");
+}
+
+// ── C++ ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_cpp_extracts_class_namespace_function() {
+    let source = r#"
+namespace geo {
+    class Shape {
+    public:
+        double area();
+    };
+}
+
+int* clamp(int* p) { return p; }
+"#;
+    let chunks = extract(source, Language::Cpp);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "Shape");
+    assert_has_name(&chunks, "geo");
+    // Pointer return type must not steal the name slot from the declarator.
+    assert_has_name(&chunks, "clamp");
+}
+
+// ── C# ───────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_csharp_extracts_class_interface_method() {
+    let source = r#"
+namespace App {
+    interface IGreeter { string Greet(); }
+
+    public class Hello : IGreeter {
+        public string Greet() => "hi";
+    }
+
+    enum Color { Red, Green }
+}
+"#;
+    let chunks = extract(source, Language::CSharp);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Method);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_name(&chunks, "Hello");
+    assert_has_name(&chunks, "Greet");
+}
+
+// ── Ruby ─────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_ruby_extracts_module_class_method() {
+    let source = r#"
+module Greetable
+  def greet
+    "hi"
+  end
+end
+
+class Person
+  include Greetable
+  def name
+    @name
+  end
+end
+"#;
+    let chunks = extract(source, Language::Ruby);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Method);
+    assert_has_name(&chunks, "Person");
+    assert_has_name(&chunks, "greet");
+}
+
+// ── PHP ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_php_extracts_class_interface_function() {
+    let source = r#"<?php
+interface Greeter {
+    public function greet(): string;
+}
+
+class Hello implements Greeter {
+    public function greet(): string { return "hi"; }
+}
+
+function standalone(): int { return 42; }
+"#;
+    let chunks = extract(source, Language::Php);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Method);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "Hello");
+    assert_has_name(&chunks, "standalone");
+}
+
+// ── Kotlin ───────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_kotlin_extracts_class_function_object() {
+    let source = r#"
+class Greeter {
+    fun greet(): String { return "hi" }
+}
+
+object Config
+"#;
+    let chunks = extract(source, Language::Kotlin);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_name(&chunks, "Greeter");
+    assert_has_name(&chunks, "greet");
+}
+
+// ── Scala ────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_scala_extracts_class_trait_object() {
+    let source = r#"
+class Greeter {
+  def greet(): String = "hi"
+}
+
+trait Named
+
+object Config
+"#;
+    let chunks = extract(source, Language::Scala);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_name(&chunks, "Greeter");
+    assert_has_name(&chunks, "greet");
+}
+
+// ── Swift ────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_swift_extracts_class_protocol_function() {
+    let source = r#"
+class Greeter {
+    func greet() -> String { return "hi" }
+}
+
+protocol Named {}
+"#;
+    let chunks = extract(source, Language::Swift);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "Greeter");
+    assert_has_name(&chunks, "greet");
+}
+
+// ── Solidity ─────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_solidity_extracts_contract_interface_function() {
+    let source = r#"
+interface IERC20 {}
+
+contract Token {
+    function transfer(address to) public {}
+}
+"#;
+    let chunks = extract(source, Language::Solidity);
+    assert_has_kind(&chunks, ChunkKind::Class);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "Token");
+    assert_has_name(&chunks, "transfer");
+}
+
+// ── Lua ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_lua_extracts_functions() {
+    let source = r#"
+function greet(name)
+  return "hi"
+end
+
+local function helper()
+end
+"#;
+    let chunks = extract(source, Language::Lua);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "greet");
+    assert_has_name(&chunks, "helper");
+}
+
+// ── OCaml ────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_ocaml_extracts_value_type_module() {
+    let source = r#"
+let greet name = "hi"
+
+type color = Red | Green
+
+module Config = struct end
+"#;
+    let chunks = extract(source, Language::OCaml);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_kind(&chunks, ChunkKind::Struct);
+    assert_has_kind(&chunks, ChunkKind::Module);
+    assert_has_name(&chunks, "greet");
+    assert_has_name(&chunks, "color");
+    assert_has_name(&chunks, "Config");
+}
+
+// ── Zig ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_zig_extracts_functions() {
+    let source = r#"
+fn greet() void {}
+
+pub fn add(a: i32, b: i32) i32 {
+    return a + b;
+}
+"#;
+    let chunks = extract(source, Language::Zig);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "greet");
+    assert_has_name(&chunks, "add");
+}
+
+// ── Emacs Lisp ───────────────────────────────────────────────────────────────
+
+#[test]
+fn test_elisp_extracts_defun_defmacro() {
+    let source = r#"
+(defun greet (name) "hi")
+
+(defmacro my-macro () nil)
+"#;
+    let chunks = extract(source, Language::Elisp);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "greet");
+    assert_has_name(&chunks, "my-macro");
+}
+
+// ── TSX ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_tsx_extracts_interface_and_function() {
+    let source = r#"
+interface Props { name: string }
+
+function App(props: Props) {
+    return <div>{props.name}</div>;
+}
+"#;
+    let chunks = extract(source, Language::Tsx);
+    assert_has_kind(&chunks, ChunkKind::Trait);
+    assert_has_kind(&chunks, ChunkKind::Function);
+    assert_has_name(&chunks, "Props");
+    assert_has_name(&chunks, "App");
+}

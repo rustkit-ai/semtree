@@ -3,7 +3,12 @@
 //! Turns source files into structured [`Chunk`]s -
 //! functions, methods, structs, classes - aligned to real syntax boundaries
 //! instead of arbitrary line windows. Supports Rust, Python, JavaScript,
-//! TypeScript and Go; non-code text falls back to fixed-size windows.
+//! TypeScript, TSX, Go, Java, C, C++, C#, Ruby, PHP, Kotlin, Scala, Swift,
+//! OCaml, Solidity, Lua, Zig and Emacs Lisp; non-code text falls back to
+//! fixed-size windows.
+//!
+//! Each language is a tree-sitter query in `src/lang/queries/`; adding one is a
+//! grammar dependency plus a `.scm` file, no per-language Rust.
 //!
 //! ```no_run
 //! use semtree_parse::extract_file;
@@ -16,13 +21,11 @@
 //! ```
 
 mod error;
-mod extractor;
 mod lang;
 mod parser;
 mod text;
 
 pub use error::ParseError;
-pub use extractor::Extractor;
 pub use parser::{ParsedTree, SemtreeParser};
 pub use text::{chunk_text, is_text_file};
 
@@ -30,12 +33,14 @@ use semtree_core::{Chunk, Language};
 
 pub fn parse_and_extract(source: &str, language: Language) -> Result<Vec<Chunk>, ParseError> {
     let tree = SemtreeParser::parse(source, language)?;
-    lang::extract(&tree).map_err(|e| ParseError::Extract(e.to_string()))
+    Ok(lang::extract(&tree))
 }
 
 pub fn parse_and_extract_file(path: &std::path::Path) -> Result<Vec<Chunk>, ParseError> {
     let tree = SemtreeParser::parse_file(path)?;
-    lang::extract(&tree).map_err(|e| ParseError::Extract(e.to_string()))
+    let mut chunks = lang::extract(&tree);
+    lang::shared::finalize_paths(&mut chunks, path);
+    Ok(chunks)
 }
 
 /// Extract chunks from any supported file - code or plain text.

@@ -31,12 +31,13 @@ let chunks = parse_and_extract_file("src/lib.rs".as_ref())?;
 | `parse_and_extract_file(path)` | Parse a file, inferring the language from its extension |
 | `extract_file(path)` | Extract chunks, using the text-window fallback for non-code files |
 | `SemtreeParser` / `ParsedTree` | Lower-level tree-sitter parsing |
-| `Extractor` | Language-aware chunk extraction from a parsed tree |
 | `chunk_text` / `is_text_file` | Fixed-window chunking for plain-text and config files |
 
 ## Supported languages
 
-Rust, Python, TypeScript, JavaScript, and Go extract structured chunks (functions, types, methods). Other files (`.md`, `.json`, `.toml`, `.yaml`, ...) are chunked into overlapping line windows. See the [workspace README](https://github.com/rustkit-ai/semtree) for the full support matrix.
+Rust, Python, JavaScript, TypeScript, TSX, Go, Java, C, C++, C#, Ruby, PHP, Kotlin, Scala, Swift, OCaml, Solidity, Lua, Zig, and Emacs Lisp extract structured chunks (functions, types, methods). Other files (`.md`, `.json`, `.toml`, `.yaml`, ...) are chunked into overlapping line windows. See the [workspace README](https://github.com/rustkit-ai/semtree) for the full support matrix.
+
+Each language is a tree-sitter query in [`src/lang/queries/`](src/lang/queries); adding one is a grammar dependency plus a `.scm` file, with no per-language Rust code.
 
 ## License
 
