@@ -7,6 +7,7 @@ members = [
     "crates/semtree-store",
     "crates/semtree-rag",
     "crates/semtree-analyze",
+    "crates/semtree",
     "crates/semtree-cli",
     "examples/mcp-server",
 ]
@@ -83,3 +84,4 @@ semtree-embed   = { path = "crates/semtree-embed",   version = "0.3" }
 semtree-store   = { path = "crates/semtree-store",   version = "0.3" }
 semtree-rag     = { path = "crates/semtree-rag",     version = "0.3" }
 semtree-analyze = { path = "crates/semtree-analyze", version = "0.3" }
+semtree         = { path = "crates/semtree",         version = "0.3" }

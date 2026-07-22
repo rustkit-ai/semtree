@@ -31,20 +31,17 @@ use std::path::Path;
 use std::sync::Arc;
 
 use rmcp::{
+    ServerHandler, ServiceExt,
     handler::server::wrapper::Parameters,
     model::{CallToolResult, ContentBlock, Implementation, ServerCapabilities, ServerInfo},
     tool, tool_handler, tool_router,
     transport::stdio,
-    ServerHandler, ServiceExt,
 };
 use schemars::JsonSchema;
-use semtree_embed::fastembed::FastEmbedder;
-use semtree_rag::{ChunkRegistry, HybridSearcher, LexicalIndex, SearchEngine, SearchMode};
-use semtree_store::{usearch::UsearchStore, VectorStore};
+use semtree::embed::fastembed::FastEmbedder;
+use semtree::prelude::*;
+use semtree::store::usearch::UsearchStore;
 use serde::Deserialize;
-
-// fastembed's default AllMiniLML6V2 model produces 384-dimensional vectors.
-const EMBED_DIM: usize = 384;
 
 #[derive(Deserialize, JsonSchema)]
 struct SearchArgs {
@@ -68,7 +65,8 @@ impl SemtreeMcp {
     fn load(index_dir: &Path) -> anyhow::Result<Self> {
         let embedder = Arc::new(FastEmbedder::new()?);
 
-        let mut store = UsearchStore::new(EMBED_DIM)?;
+        // Size the store to the embedder rather than a hard-coded width.
+        let mut store = UsearchStore::new(embedder.dimension())?;
         store.load(index_dir)?;
         let store = Arc::new(store);
 

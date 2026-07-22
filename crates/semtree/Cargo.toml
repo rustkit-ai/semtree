@@ -1,0 +1,33 @@
+[package]
+name = "semtree"
+description = "Local semantic code search, batteries included: the default semtree stack (tree-sitter + fastembed + usearch + hybrid RAG) behind one crate"
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+semtree-core    = { workspace = true }
+semtree-parse   = { workspace = true }
+semtree-embed   = { workspace = true }
+semtree-store   = { workspace = true }
+semtree-rag     = { workspace = true }
+semtree-analyze = { workspace = true }
+thiserror       = { workspace = true }
+
+[features]
+# Mirror the default backends so `semtree::default_backends()` compiles out of
+# the box, while leaving the door open to opt into remote backends.
+default = ["fastembed", "usearch"]
+fastembed = ["semtree-embed/fastembed-backend"]
+usearch = ["semtree-store/usearch-backend"]
+openai = ["semtree-embed/openai-backend"]
+ollama = ["semtree-embed/ollama-backend"]
+qdrant = ["semtree-store/qdrant-backend"]
+
+[dev-dependencies]
+tokio = { workspace = true }
