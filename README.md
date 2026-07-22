@@ -59,7 +59,13 @@ By language:
 cargo install semtree-cli
 ```
 
-**Library:**
+**Library (batteries included):**
+```toml
+[dependencies]
+semtree = "0.3"   # umbrella: default stack + prelude, one dependency
+```
+
+**Library (pick your own pieces):**
 ```toml
 [dependencies]
 semtree-rag   = "0.3"   # pipeline: index, hybrid search, LLM context
@@ -136,9 +142,13 @@ index_dir = ".semtree"
 
 ## Library
 
-Assemble the pipeline from its building blocks - backends are traits, so
-`FastEmbedder`/`UsearchStore` swap for OpenAI/Ollama/Qdrant without touching the
-rest. Full runnable version: [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs).
+For the common case, the `semtree` umbrella crate wires the default stack for you:
+`semtree::default_backends()` returns a fastembed embedder and a usearch store
+sized to it, and `semtree::prelude::*` brings in the indexing and search types.
+
+To assemble the pipeline from its building blocks instead - backends are traits,
+so `FastEmbedder`/`UsearchStore` swap for OpenAI/Ollama/Qdrant without touching
+the rest. Full runnable version: [`examples/build_your_own.rs`](crates/semtree-rag/examples/build_your_own.rs).
 
 ```rust
 use std::sync::Arc;
@@ -217,11 +227,12 @@ Each crate is independently published to [crates.io](https://crates.io) - use on
 
 ```
 semtree-core     # shared types: Language, Span, Chunk, ChunkKind
-semtree-parse    # tree-sitter parsing + chunk extraction
+semtree-parse    # tree-sitter parsing + chunk extraction (query-driven)
 semtree-embed    # Embedder trait + fastembed / OpenAI / Ollama backends
 semtree-store    # VectorStore trait + usearch / Qdrant backends
 semtree-rag      # index, search, LLM context, incremental manifest
 semtree-analyze  # complexity metrics, large-function detection
+semtree          # umbrella: re-exports the default stack (batteries included)
 semtree-cli      # CLI binary (semtree)
 ```
 
@@ -229,13 +240,29 @@ semtree-cli      # CLI binary (semtree)
 
 ## Supported languages
 
-| Language   | Extracted chunks |
+Twenty languages extract structured chunks. Each is a tree-sitter query in [`semtree-parse/src/lang/queries`](crates/semtree-parse/src/lang/queries); adding one is a grammar dependency plus a `.scm` file, with no per-language Rust.
+
+| Language | Extracted chunks |
 |---|---|
-| Rust       | functions, structs, enums, traits, impls, modules |
-| Python     | functions, classes, decorators |
-| TypeScript | functions, classes, interfaces, enums, type aliases, exports |
-| JavaScript | functions, classes, generators, exports |
-| Go         | functions, methods, structs, interfaces |
+| Rust | functions, structs, enums, traits, impls, modules |
+| Python | functions, classes |
+| JavaScript | functions, classes, methods, arrow-function bindings |
+| TypeScript / TSX | functions, classes, interfaces, enums, type aliases, methods |
+| Go | functions, methods, structs, interfaces |
+| Java | classes, interfaces, enums, records, methods, constructors |
+| C | functions, structs, unions, enums |
+| C++ | functions, classes, structs, unions, enums, namespaces |
+| C# | classes, interfaces, structs, records, enums, methods, namespaces |
+| Ruby | classes, modules, methods |
+| PHP | classes, interfaces, traits, enums, functions, methods |
+| Kotlin | classes, functions, objects |
+| Scala | classes, objects, traits, functions, types |
+| Swift | classes, protocols, functions, type aliases |
+| OCaml | values, types, modules, classes |
+| Solidity | contracts, interfaces, libraries, functions, modifiers, structs, enums |
+| Lua | functions |
+| Zig | functions |
+| Emacs Lisp | functions, macros |
 
 Plain text files (`.md`, `.json`, `.toml`, `.yaml`, ...) are chunked into overlapping 40-line windows.
 
@@ -255,13 +282,15 @@ impl Embedder for MyEmbedder {
     async fn embed(&self, texts: &[&str]) -> Result<Vec<Embedding>, EmbedError> {
         todo!() // call your API or local model
     }
+    fn dimension(&self) -> usize { 384 }
+    fn model_id(&self) -> &str { "my-embedder" }
 }
 ```
 
 **Custom vector store:**
 ```rust
 use async_trait::async_trait;
-use semtree_store::{VectorStore, Hit, StoreError};
+use semtree_store::{VectorStore, Hit, Metric, StoreError};
 use semtree_embed::Embedding;
 
 struct MyStore;
@@ -274,6 +303,7 @@ impl VectorStore for MyStore {
     fn save(&self, _path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
     fn load(&mut self, _path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
     fn len(&self) -> usize { 0 }
+    fn metric(&self) -> Metric { Metric::Cosine }
 }
 ```
 
