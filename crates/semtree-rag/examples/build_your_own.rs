@@ -10,12 +10,10 @@
 
 use std::sync::Arc;
 
+use semtree_embed::Embedder;
 use semtree_embed::fastembed::FastEmbedder;
 use semtree_rag::{ChunkRegistry, HybridSearcher, Indexer, LexicalIndex, SearchEngine, SearchMode};
 use semtree_store::usearch::UsearchStore;
-
-// fastembed's default AllMiniLML6V2 model produces 384-dimensional vectors.
-const EMBED_DIM: usize = 384;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Pick your backends. Both are traits - swap FastEmbedder for OpenAI or
     //    Ollama, or UsearchStore for Qdrant, without touching the pipeline below.
     let embedder = Arc::new(FastEmbedder::new()?);
-    let store = Arc::new(UsearchStore::new(EMBED_DIM)?);
+    let store = Arc::new(UsearchStore::new(embedder.dimension())?);
 
     // 2. Index the directory: parse -> chunk -> embed -> store. The registry
     //    holds chunk metadata (path, span, kind) keyed by id.

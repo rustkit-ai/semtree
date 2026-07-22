@@ -15,18 +15,22 @@ semtree-store = "0.2"
 
 ```rust
 use std::sync::Arc;
+use semtree_embed::Embedder;
 use semtree_embed::fastembed::FastEmbedder;
+use semtree_store::VectorStore;
 use semtree_store::usearch::UsearchStore;
 use semtree_rag::{ChunkRegistry, FileManifest, Indexer, SearchEngine};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let embedder = Arc::new(FastEmbedder::new()?);
-    let store    = Arc::new(UsearchStore::new(384)?);
+    let store    = Arc::new(UsearchStore::new(embedder.dimension())?);
 
     let indexer = Indexer::new(embedder.clone(), store.clone());
     let mut registry = ChunkRegistry::default();
-    let mut manifest = FileManifest::default();
+    // Pin the manifest to this embedder and store, so a later run with a
+    // different model or metric rebuilds instead of mixing incompatible vectors.
+    let mut manifest = FileManifest::new(embedder.fingerprint(), store.metric().to_string());
 
     indexer
         .index_dir("./src".as_ref(), &mut registry, Some(&mut manifest), |done, total| {
