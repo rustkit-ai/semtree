@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use semtree_core::{ChunkKind, Language, SemtreeConfig};
 use semtree_rag::{ChunkRegistry, HybridSearcher, LexicalIndex, SearchEngine, SearchMode};
 use serde::Serialize;

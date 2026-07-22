@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use semtree_analyze::analyze_chunks;
 use semtree_rag::ChunkRegistry;
 

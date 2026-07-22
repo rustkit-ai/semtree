@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use semtree_core::SemtreeConfig;
 use semtree_rag::{ChunkRegistry, ContextBuilder, SearchEngine};
 
