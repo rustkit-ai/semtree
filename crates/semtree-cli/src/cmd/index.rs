@@ -19,7 +19,10 @@ pub async fn run(path: &Path, index_dir: &Path, config: &SemtreeConfig, full: bo
     // Fall back to a full rebuild when the existing index was built with a
     // different embedder, store, or an older chunker: reusing it would mix
     // incompatible vectors, re-rank results, or leave stale chunk IDs behind.
-    let existing = (!full).then(|| FileManifest::load(index_dir));
+    // Only treat a manifest as "existing" when one is actually on disk, so a
+    // first-ever index does not report a phantom incompatibility.
+    let has_prior_index = index_dir.join("manifest.json").exists();
+    let existing = (!full && has_prior_index).then(|| FileManifest::load(index_dir));
     let full = match &existing {
         Some(m) if !m.is_compatible_with(&fingerprint, &store_fingerprint) => {
             eprintln!(
