@@ -12,9 +12,6 @@ use semtree_core::{EmbedBackend, SemtreeConfig, StoreBackend};
 use semtree_embed::Embedder;
 use semtree_store::VectorStore;
 
-// fastembed AllMiniLML6V2 produces 384-dim embeddings
-pub const EMBED_DIM: usize = 384;
-
 pub struct Backends {
     pub embedder: Arc<dyn Embedder>,
     pub store: Arc<dyn VectorStore>,
@@ -45,10 +42,14 @@ pub fn make_backends(config: &SemtreeConfig) -> Result<Backends> {
         )),
     };
 
+    // Size the store to the embedder actually in use, not a hard-coded 384 -
+    // OpenAI (1536) and Ollama (768) produce wider vectors than fastembed.
+    let dim = embedder.dimension();
+
     let store: Arc<dyn VectorStore> = match &config.store.backend {
-        StoreBackend::Usearch => Arc::new(semtree_store::usearch::UsearchStore::new(EMBED_DIM)?),
+        StoreBackend::Usearch => Arc::new(semtree_store::usearch::UsearchStore::new(dim)?),
         StoreBackend::Qdrant => Arc::new(semtree_store::qdrant::QdrantStore::new(
-            EMBED_DIM,
+            dim,
             config.store.url.clone(),
             config.store.collection.clone(),
         )?),
