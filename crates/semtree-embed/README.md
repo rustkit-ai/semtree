@@ -41,6 +41,8 @@ impl Embedder for MyEmbedder {
     async fn embed(&self, texts: &[&str]) -> Result<Vec<Embedding>, EmbedError> {
         todo!()
     }
+    fn dimension(&self) -> usize { 384 }
+    fn model_id(&self) -> &str { "my-embedder" }
 }
 ```
 

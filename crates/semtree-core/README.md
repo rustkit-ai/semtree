@@ -8,7 +8,7 @@ This crate has no heavy dependencies. It defines the types every other `semtree-
 
 | Type | Purpose |
 |---|---|
-| `Language` | Supported source languages (Rust, Python, TypeScript, JavaScript, Go, ...) |
+| `Language` | The 20 supported source languages (Rust, Python, JS/TS/TSX, Go, Java, C/C++, C#, Ruby, PHP, Kotlin, Scala, Swift, OCaml, Solidity, Lua, Zig, Emacs Lisp) |
 | `Span` | A byte/line range within a source file |
 | `Chunk` / `ChunkKind` | An extracted unit (function, struct, method, text window) with its span and metadata |
 | `SemtreeConfig` | Parsed `.semtree.toml`: embedding and store backends, index dir |

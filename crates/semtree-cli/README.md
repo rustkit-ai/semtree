@@ -16,7 +16,7 @@ cargo install semtree-cli
 semtree init                                   # create .semtree.toml
 semtree index ./my-project                     # index (incremental by default)
 semtree index ./my-project --full              # force a full re-scan
-semtree search "error handling strategy" -k 5  # semantic / hybrid search
+semtree search "error handling strategy" -t 5  # semantic / hybrid search
 semtree context "authentication flow"          # RAG context block for LLMs
 semtree stats                                  # chunks, languages, index size
 semtree analyze                                # complexity metrics, largest functions

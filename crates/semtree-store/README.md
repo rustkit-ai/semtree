@@ -33,7 +33,7 @@ Implement `VectorStore` to target any vector database:
 
 ```rust
 use async_trait::async_trait;
-use semtree_store::{VectorStore, Hit, StoreError};
+use semtree_store::{VectorStore, Hit, Metric, StoreError};
 use semtree_embed::Embedding;
 
 struct MyStore;
@@ -46,6 +46,7 @@ impl VectorStore for MyStore {
     fn save(&self, path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
     fn load(&mut self, path: &std::path::Path) -> Result<(), StoreError> { Ok(()) }
     fn len(&self) -> usize { 0 }
+    fn metric(&self) -> Metric { Metric::Cosine }
 }
 ```
 
