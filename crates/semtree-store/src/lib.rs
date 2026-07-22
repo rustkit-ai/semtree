@@ -21,4 +21,4 @@ pub mod usearch;
 pub mod qdrant;
 
 pub use error::StoreError;
-pub use store::{Hit, VectorStore};
+pub use store::{Hit, Metric, VectorStore};

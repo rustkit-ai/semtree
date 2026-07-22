@@ -6,13 +6,14 @@ use semtree_embed::Embedding;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{Hit, StoreError, VectorStore};
+use crate::{Hit, Metric, StoreError, VectorStore};
 
 pub struct QdrantStore {
     client: Client,
     base_url: String,
     collection: String,
     dimensions: usize,
+    metric: Metric,
     count: AtomicUsize,
     initialized: AtomicBool,
 }
@@ -23,6 +24,15 @@ impl QdrantStore {
         url: Option<String>,
         collection: Option<String>,
     ) -> Result<Self, StoreError> {
+        Self::with_metric(dimensions, url, collection, Metric::Cosine)
+    }
+
+    pub fn with_metric(
+        dimensions: usize,
+        url: Option<String>,
+        collection: Option<String>,
+        metric: Metric,
+    ) -> Result<Self, StoreError> {
         Ok(Self {
             client: Client::new(),
             base_url: url
@@ -32,9 +42,18 @@ impl QdrantStore {
                 .to_string(),
             collection: collection.unwrap_or_else(|| "semtree".to_string()),
             dimensions,
+            metric,
             count: AtomicUsize::new(0),
             initialized: AtomicBool::new(false),
         })
+    }
+
+    fn qdrant_distance(&self) -> &'static str {
+        match self.metric {
+            Metric::Cosine => "Cosine",
+            Metric::Euclidean => "Euclid",
+            Metric::DotProduct => "Dot",
+        }
     }
 
     async fn ensure_collection(&self) -> Result<(), StoreError> {
@@ -57,7 +76,7 @@ impl QdrantStore {
             let body = json!({
                 "vectors": {
                     "size": self.dimensions,
-                    "distance": "Cosine"
+                    "distance": self.qdrant_distance()
                 }
             });
             let resp = self
@@ -219,5 +238,9 @@ impl VectorStore for QdrantStore {
 
     fn len(&self) -> usize {
         self.count.load(Ordering::Relaxed)
+    }
+
+    fn metric(&self) -> Metric {
+        self.metric
     }
 }
