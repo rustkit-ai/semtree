@@ -62,7 +62,7 @@ mod search;
 pub use context::{ContextBuilder, ContextSnippet, ContextWindow};
 pub use error::RagError;
 pub use hybrid::{HybridSearcher, SearchMode};
-pub use indexer::{collect_indexable_files, Indexer};
+pub use indexer::{Indexer, collect_indexable_files};
 pub use lexical::LexicalIndex;
 pub use manifest::FileManifest;
 pub use registry::ChunkRegistry;
