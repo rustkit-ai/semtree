@@ -5,6 +5,8 @@ use crate::{EmbedError, Embedder, Embedding};
 
 pub struct FastEmbedder {
     model: TextEmbedding,
+    model_id: String,
+    dimension: usize,
 }
 
 impl FastEmbedder {
@@ -13,9 +15,25 @@ impl FastEmbedder {
     }
 
     pub fn with_model(model: EmbeddingModel) -> Result<Self, EmbedError> {
+        // `{model:?}` yields the variant name (e.g. `AllMiniLML6V2`), which is
+        // stable across releases and unique per model.
+        let model_id = format!("fastembed:{model:?}");
         let te = TextEmbedding::try_new(InitOptions::new(model))
             .map_err(|e| EmbedError::ModelLoad(e.to_string()))?;
-        Ok(Self { model: te })
+
+        // Probe the real dimension instead of hard-coding a per-model table.
+        let dimension = te
+            .embed(vec!["dimension probe".to_string()], None)
+            .map_err(|e| EmbedError::EmbedFailed(e.to_string()))?
+            .first()
+            .map(|v| v.len())
+            .ok_or_else(|| EmbedError::EmbedFailed("empty probe embedding".to_string()))?;
+
+        Ok(Self {
+            model: te,
+            model_id,
+            dimension,
+        })
     }
 }
 
@@ -26,5 +44,13 @@ impl Embedder for FastEmbedder {
         self.model
             .embed(texts, None)
             .map_err(|e| EmbedError::EmbedFailed(e.to_string()))
+    }
+
+    fn dimension(&self) -> usize {
+        self.dimension
+    }
+
+    fn model_id(&self) -> &str {
+        &self.model_id
     }
 }

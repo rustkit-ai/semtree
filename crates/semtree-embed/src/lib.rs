@@ -22,6 +22,8 @@
 //!     async fn embed(&self, texts: &[&str]) -> Result<Vec<Embedding>, EmbedError> {
 //!         Ok(texts.iter().map(|_| vec![0.0; 384]).collect())
 //!     }
+//!     fn dimension(&self) -> usize { 384 }
+//!     fn model_id(&self) -> &str { "zeros" }
 //! }
 //! ```
 
